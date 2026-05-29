@@ -329,7 +329,7 @@ const SCENES = {
       },
       {
         id:"zona5", label:"Cafeteira", emoji:"☕",
-        x:75, y:38, w:10, h:28,
+        x:75, y:38, w:15, h:22,
         type:"action",
         actionIds:["cafe_edit"],
       },
