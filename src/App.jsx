@@ -176,7 +176,7 @@ const SCENES = {
       },
       {
         id:"zona4", label:"Mesas", emoji:"🧘",
-        x:32, y:35, w:38, h:35,
+        x:32, y:65, w:38, h:35,
         type:"action",
         actionIds:["almoco_rapido","mesa_quieta"],
       },
@@ -188,7 +188,7 @@ const SCENES = {
       },
       {
         id:"zona6", label:"TV — Silvio Santos", emoji:"📺",
-        x:70, y:10, w:18, h:22,
+        x:70, y:40, w:10, h:12,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
