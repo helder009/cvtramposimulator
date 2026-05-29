@@ -188,7 +188,7 @@ const SCENES = {
       },
       {
         id:"zona6", label:"TV — Silvio Santos", emoji:"📺",
-        x:70, y:40, w:10, h:12,
+        x:70, y:20, w:10, h:12,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
