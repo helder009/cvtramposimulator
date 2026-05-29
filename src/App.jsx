@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-
+ 
 // ── CONSTANTES ────────────────────────────────────────────────────────────────
 const TOTAL_TURNS = 38;
 const TURN_MIN    = 15;
 const WARN = 28; const DANGER = 10;
 const clamp = v => Math.max(0, Math.min(100, v));
-
+ 
 const SHIFT_OPTIONS = [
   { label:"08:00", startH:8,  startM:0 },
   { label:"11:00", startH:11, startM:0 },
   { label:"13:00", startH:13, startM:0 },
 ];
-
+ 
 function genLabels(startH, startM) {
   const out = [];
   let h = startH, m = startM;
@@ -21,12 +21,12 @@ function genLabels(startH, startM) {
   }
   return out;
 }
-
+ 
 function timeToTurn(hhmm, startH, startM) {
   const [h,m] = hhmm.split(":").map(Number);
   return Math.max(0, Math.floor(((h*60+m)-(startH*60+startM))/TURN_MIN));
 }
-
+ 
 // Limites de uso por ação (undefined = ilimitado)
 const ACTION_LIMITS = {
   cafe_praca:2, cafe_caro:2, cafe_edit:3,
@@ -46,7 +46,7 @@ const ACTION_LIMITS = {
   // Jornalismo
   pacote_grafico:1, censurar_crime:4, checar_email:4, cafe_gui:2, agua_coco:1,
 };
-
+ 
 // Categorias para bloqueio global por eventos críticos
 const ACTION_CAT = {
   fazer_vinheta:"criar", fazer_logo:"criar", buscar_ref:"criar", pegar_tarefa:"criar",
@@ -63,7 +63,7 @@ const ACTION_CAT = {
   pacote_grafico:"criar", censurar_crime:"criar", checar_email:"criar",
   cafe_gui:"socializar", agua_coco:null,
 };
-
+ 
 // ── NPCs ──────────────────────────────────────────────────────────────────────
 const NPCS = {
   helder:  { id:"helder",  name:"Hélder",     role:"Coordenador",     emoji:"👨‍💼",
@@ -79,7 +79,7 @@ const NPCS = {
     idle:"O atendente serve o prato com uma confiança suspeita.",
     chat:["Sr. Calango: 'Feijão fresquinho! De hoje... ou ontem. Não lembro.'","Sr. Calango: 'A carne tá no ponto. Qual ponto? Não pergunte.'","Sr. Calango: 'Bom apetite! E boa sorte.' 🦎"] },
 };
-
+ 
 // ── EVENTOS CRÍTICOS ──────────────────────────────────────────────────────────
 const CRITICAL_EVENTS = {
   identidade:[
@@ -107,7 +107,7 @@ const CRITICAL_EVENTS = {
     { id:"ao_vivo",       emoji:"📺", title:"Você Vazou no AO VIVO!",    msg:"A câmera te pegou no fundo do jornal comendo uma coxinha. Viralizou instantaneamente.",              type:"lock", category:"socializar", turns:20 },
   ],
 };
-
+ 
 // ── FAMOSOS ───────────────────────────────────────────────────────────────────
 const FAMOSOS = [
   { id:"patricia", nome:"Patricia Abravanel", emoji:"👑", prob:0.25,
@@ -127,7 +127,7 @@ const FAMOSOS = [
     frase:"Você Sabia que o Agnaldo Timóteo foi motorista da Ângela Maria?",
     effects:{criar:-40, mexer:0, socializar:+40} },
 ];
-
+ 
 // Sorteia um famoso ponderado pelas probabilidades
 function sortearFamoso() {
   const r = Math.random();
@@ -138,8 +138,8 @@ function sortearFamoso() {
   }
   return FAMOSOS[FAMOSOS.length-1];
 }
-
-
+ 
+ 
 const SCENE_NAV_LABELS = {
   praca:"Praça", identidade:"Id. Visual", editoria:"Editoria",
   corredor:"Corredor", banheiro:"Banheiro", calango:"Calango",
@@ -147,7 +147,7 @@ const SCENE_NAV_LABELS = {
 };
 const SCENE_ORDER_BASE = ["praca","identidade","editoria","corredor","banheiro","calango","externo"];
 const SCENE_ORDER_DAY2 = ["praca","identidade","editoria","corredor","banheiro","calango","externo","jornalismo"];
-
+ 
 const SCENES = {
   praca:{
     id:"praca", name:"Praça de Alimentação", emoji:"🍽️",
@@ -157,38 +157,38 @@ const SCENES = {
     clickZones:[
       {
         id:"zona1", label:"Casa do Pão de Quê?", emoji:"☕",
-        x:0, y:25, w:18, h:65,
+        x:0, y:22, w:18, h:68,
         type:"action",
         actionIds:["cafe_praca"],
       },
       {
-        id:"zona2", label:"Sochi Colorido", emoji:"🧆",
-        x:18, y:28, w:15, h:45,
-        type:"action",
+        id:"zona2", label:"Suchi Colorido", emoji:"🧆",
+        x:18, y:26, w:14, h:42,
+        type:"action+dia",  // indisponível a partir do dia 3
         actionIds:["cafe_caro"],
-        // indisponível a partir do dia 3 — controlado por getLimit retornar 0
+        maxDay:2,
       },
       {
         id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎",
-        x:18, y:68, w:10, h:28,
+        x:18, y:68, w:14, h:28,
         type:"action",
         actionIds:["ir_calango"],
       },
       {
         id:"zona4", label:"Mesas", emoji:"🧘",
-        x:30, y:38, w:45, h:55,
+        x:32, y:35, w:38, h:55,
         type:"action",
         actionIds:["almoco_rapido","mesa_quieta"],
       },
       {
         id:"zona5", label:"Famoso", emoji:"📸",
-        x:75, y:28, w:22, h:65,
-        type:"famoso", // zona especial — só aparece quando há famoso
+        x:70, y:28, w:18, h:62,
+        type:"famoso",
         actionIds:["foto_famoso"],
       },
       {
         id:"zona6", label:"TV — Silvio Santos", emoji:"📺",
-        x:72, y:15, w:14, h:22,
+        x:70, y:10, w:18, h:22,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
@@ -434,7 +434,7 @@ const SCENES = {
     ]
   }
 };
-
+ 
 // ── COMPONENTES ───────────────────────────────────────────────────────────────
 const StatBar = ({ label, emoji, value, color, locked }) => {
   const pct = clamp(value);
@@ -453,7 +453,7 @@ const StatBar = ({ label, emoji, value, color, locked }) => {
     </div>
   );
 };
-
+ 
 // Duas barras: garrafa + hidratação
 const HydSection = ({ garrafa, agua, canDrinkHere }) => {
   const pctG = clamp(garrafa);
@@ -496,7 +496,7 @@ const HydSection = ({ garrafa, agua, canDrinkHere }) => {
     </div>
   );
 };
-
+ 
 // Chat log
 const ChatLog = ({ log }) => {
   const containerRef = useRef(null);
@@ -522,7 +522,7 @@ const ChatLog = ({ log }) => {
     </div>
   );
 };
-
+ 
 // Botão de ação reutilizável com contador de uso
 const ActionBtn = ({ a, locked, unavail, exhausted, usageCount, limit, onAction }) => {
   const disabled = locked||unavail||exhausted;
@@ -530,7 +530,7 @@ const ActionBtn = ({ a, locked, unavail, exhausted, usageCount, limit, onAction 
   let tl = "instantâneo";
   if(a.special==="cochilo") tl="30min ~ 2h";
   else if(a.time>0) tl=`${a.time*15}min`;
-
+ 
   return (
     <button onClick={()=>!disabled&&onAction(a)}
       style={{background:disabled?"#080810":"#0e0e1c",border:`1px solid ${locked?"#ff444444":unavail?"#2a1a0033":exhausted?"#1a2a1a":"#1a1a2c"}`,borderRadius:7,padding:"7px 10px",color:disabled?"#2a2a35":"#c0c0d0",cursor:disabled?"not-allowed":"pointer",fontSize:11,textAlign:"left",display:"flex",alignItems:"center",gap:7,fontFamily:"monospace",transition:"border-color .15s,background .15s",width:"100%"}}
@@ -552,7 +552,7 @@ const ActionBtn = ({ a, locked, unavail, exhausted, usageCount, limit, onAction 
     </button>
   );
 };
-
+ 
 // Menu popup para Identidade Visual
 const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimit, onAction, onClose }) => {
   return (
@@ -586,7 +586,7 @@ const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimi
     </div>
   );
 };
-
+ 
 // ── INTRO ─────────────────────────────────────────────────────────────────────
 const Intro = ({ onStart }) => {
   const [nome, setNome] = useState("");
@@ -601,7 +601,7 @@ const Intro = ({ onStart }) => {
           Mantenha <strong style={{color:"#5b8dee"}}>Criatividade</strong>, <strong style={{color:"#a855f7"}}>Socialização</strong>, <strong style={{color:"#22c55e"}}>Movimentação</strong> e <strong style={{color:"#38bdf8"}}>Hidratação</strong> acima do zero.<br/>
           <em style={{color:"#555"}}>Cuidado com os eventos críticos. E com o Calango. 🦎</em>
         </p>
-
+ 
         <div style={{background:"#0d0d18",border:"1px solid #2a2a3a",borderRadius:10,padding:"14px 18px",margin:"12px 0",textAlign:"left"}}>
           <label style={{fontSize:9,color:"#e8c840",letterSpacing:2,display:"block",marginBottom:7,textTransform:"uppercase"}}>Seu nome ou apelido</label>
           <input value={nome} onChange={e=>setNome(e.target.value)}
@@ -610,7 +610,7 @@ const Intro = ({ onStart }) => {
             style={{width:"100%",background:"#060610",border:"1px solid #333",borderRadius:6,padding:"8px 12px",color:"#fff",fontFamily:"monospace",fontSize:13,outline:"none",boxSizing:"border-box"}}
             autoFocus/>
         </div>
-
+ 
         <div style={{background:"#0d0d18",border:"1px solid #2a2a3a",borderRadius:10,padding:"14px 18px",margin:"12px 0",textAlign:"left"}}>
           <div style={{fontSize:9,color:"#e8c840",letterSpacing:2,marginBottom:10,textTransform:"uppercase"}}>Horário de entrada</div>
           <div style={{display:"flex",gap:8}}>
@@ -623,7 +623,7 @@ const Intro = ({ onStart }) => {
             ))}
           </div>
         </div>
-
+ 
         <div style={{background:"#0a0a14",border:"1px solid #1a1a2a",borderRadius:8,padding:"10px 14px",marginBottom:14,textAlign:"left",fontSize:11,color:"#555"}}>
           <div style={{color:"#e8c840",marginBottom:5,fontSize:9,letterSpacing:2,textTransform:"uppercase"}}>Como jogar</div>
           <div style={{marginBottom:2}}>🏠 Navegue pelos ambientes do SBT</div>
@@ -631,7 +631,7 @@ const Intro = ({ onStart }) => {
           <div style={{marginBottom:2}}>💧 Hidratação: beba água na ID Visual ou Editoria!</div>
           <div>🔒 Eventos críticos bloqueiam ações</div>
         </div>
-
+ 
         <button onClick={()=>nome.trim()&&shift&&onStart(nome.trim(),shift)}
           disabled={!nome.trim()||!shift}
           style={{background:(nome.trim()&&shift)?"#e8c840":"#222",color:(nome.trim()&&shift)?"#000":"#555",border:"none",padding:"11px 34px",borderRadius:8,cursor:(nome.trim()&&shift)?"pointer":"not-allowed",fontSize:13,fontFamily:"monospace",fontWeight:"bold",letterSpacing:2,textTransform:"uppercase",transition:"all 0.2s"}}>
@@ -641,7 +641,7 @@ const Intro = ({ onStart }) => {
     </div>
   );
 };
-
+ 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 export default function SBTGame() {
   const [phase, setPhase]             = useState("intro");
@@ -675,7 +675,7 @@ export default function SBTGame() {
   const [famosoAtual, setFamosoAtual] = useState(null);   // famoso disponível hoje na praça
   const [famosoUsado, setFamosoUsado] = useState(false);  // já tirou foto hoje
   const audioRef                      = useRef(null);
-
+ 
   // Stats iniciais variam por dia
   const getInitialStats = (d) => {
     // d = expedientes já completos (0 = primeiro dia ainda)
@@ -685,9 +685,9 @@ export default function SBTGame() {
     const base = Math.max(2, 28 - (day - 3) * 2); // dia 3=28, dia 4=26, dia 5=24...
     return { criar:base, socializar:base, mexer:base };
   };
-
+ 
   const addLog = (msg, type="normal") => setLog(p=>[{msg,type},...p].slice(0,50));
-
+ 
   // Sorteia famoso ao iniciar o jogo/dia (só a partir do dia 2)
   useEffect(()=>{
     if(phase!=="game") return;
@@ -699,7 +699,7 @@ export default function SBTGame() {
     }
     setFamosoUsado(false);
   },[phase, days]);
-
+ 
   // ── RANKING ────────────────────────────────────────────────────────────────
   // Carrega ranking do storage compartilhado ao montar
   useEffect(()=>{
@@ -710,7 +710,7 @@ export default function SBTGame() {
       } catch(e) { setRanking([]); }
     })();
   },[]);
-
+ 
   // Calcula pontuação: cada expediente vencido = 9h30 = 570min
   // Expedientes parciais (derrota) = turnsWon * 15min
   // days = expedientes já completos (começa em 0, incrementa ao vencer)
@@ -723,7 +723,7 @@ export default function SBTGame() {
     const m = remainMin % 60;
     return { totalMin, d, h, m };
   };
-
+ 
   const saveToRanking = async (completedDays, wonTurns, survived) => {
     const score = calcScore(completedDays, wonTurns);
     const entry = {
@@ -745,7 +745,7 @@ export default function SBTGame() {
       setRanking(updated);
     } catch(e) {}
   };
-
+ 
   // Música de fundo
   useEffect(()=>{
     const audio = audioRef.current;
@@ -754,13 +754,13 @@ export default function SBTGame() {
     if(musicOn && phase==="game"){ audio.play().catch(()=>{}); }
     else { audio.pause(); }
   },[musicOn, phase, volume]);
-
+ 
   useEffect(()=>{
     if(audioRef.current) audioRef.current.volume = volume;
   },[volume]);
-
+ 
   const incUsage = (id) => setUsageCounts(p=>({...p,[id]:(p[id]||0)+1}));
-
+ 
   // Limites que mudam a partir do Dia 3 (days >= 2 = terceiro dia em diante)
   const ACTION_LIMITS_DAY3 = {
     lavar_rosto:4, papo_kell:1, meme_jess:1,
@@ -768,7 +768,7 @@ export default function SBTGame() {
     voltinha:2, fumar:3,
     cafe_caro:0, // indisponível a partir do dia 3
   };
-
+ 
   const getLimit = (id) => {
     const currentDay = days + 1; // dia atual (1-based)
     if(currentDay >= 3 && ACTION_LIMITS_DAY3[id] !== undefined){
@@ -776,7 +776,7 @@ export default function SBTGame() {
     }
     return ACTION_LIMITS[id];
   };
-
+ 
   const isExhausted = (id) => {
     // Foto com famoso: indisponível no dia 1, ou se famoso não apareceu, ou já usado
     if(id==="foto_famoso"){
@@ -790,14 +790,14 @@ export default function SBTGame() {
     if(id==="voltinha_calango" && !calangoPassed) return true;
     return (usageCounts[id]||0) >= limit;
   };
-
+ 
   const applyFx = (fx) => {
     if(!fx) return;
     setStats(prev=>{ const n={...prev}; for(const [k,v] of Object.entries(fx)){ if(k==="agua"||k==="garrafa") continue; if(k in n) n[k]=clamp(n[k]+v); } return n; });
     if(fx.agua!=null)    setAgua(p=>clamp(p+fx.agua));
     if(fx.garrafa!=null) setGarrafa(p=>clamp(p+fx.garrafa));
   };
-
+ 
   // Beber água: consome 25% da garrafa, +20% de hidratação; a cada 2 cliques gasta 1 turno (15min)
   const drinkWater = () => {
     if(garrafa<=0){ addLog("🪣 A garrafa está vazia! Encha no corredor.","warn"); return; }
@@ -805,13 +805,13 @@ export default function SBTGame() {
     setAgua(p=>clamp(p+20));
     addLog(`💧 ${name} tomou um gole de água. Garrafa −25%.`, "water");
   };
-
+ 
   // Hidratação: −10% em ações de mov. e soc. independente da duração
   const drainHydIfNeeded = (id) => {
     const cat = ACTION_CAT[id];
     if(cat==="mexer"||cat==="socializar") setAgua(p=>clamp(p-10));
   };
-
+ 
   const advanceTurns = (amount) => {
     if(amount<=0) return;
     setLocks(prev=>{ const n={}; for(const [k,v] of Object.entries(prev)){ const nv=v-amount; if(nv>0) n[k]=nv; } return n; });
@@ -826,7 +826,7 @@ export default function SBTGame() {
       return nt;
     });
   };
-
+ 
   const maybeCritical = (sceneId) => {
     const evts = CRITICAL_EVENTS[sceneId];
     if(!evts) return;
@@ -845,36 +845,36 @@ export default function SBTGame() {
     setCritModal(ev);
     addLog(`🚨 EVENTO CRÍTICO: ${ev.title}`,"critical");
   };
-
+ 
   const isActionLocked = (id) => { const cat=ACTION_CAT[id]; return cat&&(locks[cat]||0)>0; };
-
+ 
   const isAvail = (a) => {
     if(!shiftCfg) return true;
     if(a.availFrom && turn < timeToTurn(a.availFrom, shiftCfg.startH, shiftCfg.startM)) return false;
     if(a.availUntil && turn > timeToTurn(a.availUntil, shiftCfg.startH, shiftCfg.startM)) return false;
     return true;
   };
-
+ 
   const doAction = (a) => {
     if(turn>=TOTAL_TURNS) return;
     if(isActionLocked(a.id)) return;
     if(!isAvail(a)) return;
     if(isExhausted(a.id)) return;
-
+ 
     const lbl = turnLabels[Math.min(turn,TOTAL_TURNS-1)];
-
+ 
     // Navigate
     if(a.navigate){ setScene(a.navigate); if(a.msg) addLog(`[${lbl}] ${a.emoji} ${a.msg}`); setOpenZone(null); setHotspot(null); setNpcMsg(null); return; }
-
+ 
     // Drink (click na garrafa na ID Visual)
     if(a.special==="drink"){ drinkWater(); setOpenZone(null); return; }
-
+ 
     // Encher garrafa
     if(a.special==="encher"){ setGarrafa(100); applyFx(a.effects); drainHydIfNeeded(a.id); incUsage(a.id); addLog(`[${lbl}] 🫙 Garrafa enchida! ${a.msg} (15min)`); advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null); return; }
-
+ 
     // Fumar
     if(a.special==="fumar"){ setAgua(p=>clamp(p/2)); }
-
+ 
     // Cochilo
     if(a.special==="cochilo"){
       const r=Math.random();
@@ -888,7 +888,7 @@ export default function SBTGame() {
       advanceTurns(ct); maybeCritical("banheiro");
       setOpenZone(null); setHotspot(null); setNpcMsg(null); return;
     }
-
+ 
     // Calango
     if(a.special==="calango_risk"){
       const intox=Math.random()<0.30;
@@ -905,19 +905,19 @@ export default function SBTGame() {
       }
       advanceTurns(a.time||4); setOpenZone(null); setHotspot(null); setNpcMsg(null); return;
     }
-
+ 
     // Voltinha pós-Calango
     if(a.special==="voltinha_pos"){
       if(!calangoPassed){ addLog("🦎 Só disponível após passar no teste do Calango!","warn"); return; }
     }
-
+ 
     // Água de Coco Mágica — restaura hidratação 100%
     if(a.id==="agua_coco"){
       setAgua(100); incUsage(a.id);
       const lbl2=turnLabels[Math.min(turn,TOTAL_TURNS-1)];
       addLog(`[${lbl2}] 🥥 ${a.msg}`,"water"); return;
     }
-
+ 
     // Foto com famoso — usa o famoso sorteado no início do dia
     if(a.special==="foto_famoso"){
       if(!famosoAtual||famosoUsado) return;
@@ -933,23 +933,23 @@ export default function SBTGame() {
       setOpenZone(null); setHotspot(null);
       return;
     }
-
+ 
     if(a.npcId&&NPCS[a.npcId]){
       const npc=NPCS[a.npcId];
       setNpcMsg({npc,line:npc.chat[Math.floor(Math.random()*npc.chat.length)]});
     }
-
+ 
     applyFx(a.effects);
     drainHydIfNeeded(a.id);
     incUsage(a.id);
-
+ 
     const tl = a.time===0?"instantâneo":`${a.time*15}min`;
     addLog(`[${lbl}] ${a.emoji} ${a.msg} (${tl})`);
-
+ 
     if(a.time>0){ advanceTurns(a.time); maybeCritical(scene); }
     setOpenZone(null); setHotspot(null);
   };
-
+ 
   // game over / vitória
   useEffect(()=>{
     if(phase!=="game") return;
@@ -967,7 +967,7 @@ export default function SBTGame() {
       if(v>WARN&&warned[k])   setWarned(p=>({...p,[k]:false}));
     });
   },[stats,agua]);
-
+ 
   const resetGame = ()=>{
     setPhase("intro");setTurn(0);setScene("praca");
     setStats({criar:40,socializar:40,mexer:40});setAgua(70);setGarrafa(100);
@@ -976,7 +976,7 @@ export default function SBTGame() {
     setLocks({});setCritModal(null);setOpenZone(null);setUsageCounts({});
     setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);
   };
-
+ 
   // Continua para o próximo dia sem resetar tudo
   const nextDay = () => {
     const newDays = days + 1;
@@ -991,9 +991,9 @@ export default function SBTGame() {
     setZonaMsg(null);
     setPhase("game");
   };
-
+ 
   const handleStart=(n,s)=>{ setName(n);setShiftCfg(s);setTurnLabels(genLabels(s.startH,s.startM));setPhase("game"); };
-
+ 
   // ── LAYOUT RESPONSIVO ─────────────────────────────────────────────────────
   // O jogo foi desenhado em 1280×720. Escalamos proporcionalmente para caber
   // em qualquer janela, mantendo o aspect ratio e centralizando.
@@ -1008,7 +1008,7 @@ export default function SBTGame() {
     window.addEventListener("resize", calc);
     return () => window.removeEventListener("resize", calc);
   }, []);
-
+ 
   const W = {
     width:"1280px", height:"720px",
     position:"relative", overflow:"hidden",
@@ -1029,11 +1029,11 @@ export default function SBTGame() {
     width:`${SCALED_W}px`, height:`${SCALED_H}px`,
     position:"relative", overflow:"hidden", flexShrink:0,
   };
-
+ 
   if(phase==="intro") return (
     <div style={OUTER}><div style={INNER}><div style={W}><Intro onStart={handleStart}/></div></div></div>
   );
-
+ 
   if(phase==="nextday"){
     const score = calcScore(days, TOTAL_TURNS);
     return (
@@ -1069,12 +1069,12 @@ export default function SBTGame() {
       </div></div></div>
     );
   }
-
+ 
   if(phase==="end"){
     const survived = !endReason;
     const score = calcScore(days, survived ? TOTAL_TURNS : turn);
     const myRankPos = ranking.findIndex(r=>r.name===name&&r.totalMin===score.totalMin);
-
+ 
     const formatTime = (d,h,m) => {
       const parts=[];
       if(d>0) parts.push(`${d} dia${d!==1?"s":""}`);
@@ -1082,11 +1082,11 @@ export default function SBTGame() {
       if(m>0) parts.push(`${m}min`);
       return parts.length>0?parts.join(" e "):"menos de 1min";
     };
-
+ 
     return (
       <div style={OUTER}><div style={INNER}><div style={{...W,background:survived?"linear-gradient(135deg,#001500,#002000)":"linear-gradient(135deg,#150000,#200000)",display:"flex",alignItems:"center",justifyContent:"center"}}>
         <div style={{width:"100%",maxWidth:900,padding:"0 24px",display:"flex",gap:20,alignItems:"flex-start",justifyContent:"center"}}>
-
+ 
           {/* Coluna esquerda: resultado */}
           <div style={{flex:"0 0 380px",textAlign:"center"}}>
             <div style={{fontSize:56,marginBottom:8}}>{survived?"🏆":"😵"}</div>
@@ -1095,7 +1095,7 @@ export default function SBTGame() {
               {survived?`${name} se aposentou no SBT!`:`${name} não resistiu`}
             </h2>
             {!survived&&<p style={{color:"#666",fontSize:11,marginBottom:10,fontFamily:"sans-serif"}}>{endReason}</p>}
-
+ 
             {/* PLACAR */}
             <div style={{background:"#0d0d18",border:"2px solid #e8c840",borderRadius:12,padding:"16px 20px",marginBottom:14,textAlign:"center"}}>
               <div style={{fontSize:9,color:"#e8c840",letterSpacing:3,textTransform:"uppercase",marginBottom:8,fontFamily:"monospace"}}>⏱ Tempo de Sobrevivência</div>
@@ -1117,7 +1117,7 @@ export default function SBTGame() {
                 </div>}
               </div>
             </div>
-
+ 
             <div style={{display:"flex",gap:8,justifyContent:"center"}}>
               <button onClick={resetGame} style={{background:"#e8c840",color:"#000",border:"none",padding:"10px 20px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"monospace",fontWeight:"bold"}}>
                 🔄 Novo Expediente
@@ -1127,7 +1127,7 @@ export default function SBTGame() {
               </button>
             </div>
           </div>
-
+ 
           {/* Coluna direita: ranking */}
           {showRanking&&(
             <div style={{flex:"0 0 340px",background:"#0a0a16",border:"1px solid #1a1a2e",borderRadius:12,padding:"14px 16px",maxHeight:460,overflowY:"auto"}}>
@@ -1159,12 +1159,12 @@ export default function SBTGame() {
               })}
             </div>
           )}
-
+ 
         </div>
       </div></div></div>
     );
   }
-
+ 
   const cur = SCENES[scene];
   const canDrink = !!cur.canDrink;
   const SCENE_ORDER = days >= 1 ? SCENE_ORDER_DAY2 : SCENE_ORDER_BASE;
@@ -1172,15 +1172,15 @@ export default function SBTGame() {
   const lbl = turnLabels[Math.min(turn,TOTAL_TURNS-1)]||"--";
   const hasLocks = Object.values(locks).some(v=>v>0);
   const isClickScene = !!cur.clickZones;
-
+ 
   return (
     <div style={OUTER}>
     <div style={INNER}>
     <div style={W}>
-
+ 
       {/* ÁUDIO DE FUNDO */}
       <audio ref={audioRef} src="https://res.cloudinary.com/dio7kf0tb/video/upload/v1777134013/Mofadinho_Salgado___Game_V4_ijxoys.mp3" loop preload="auto"/>
-
+ 
       {/* CRITICAL MODAL */}
       {critModal&&(
         <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.87)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999}}>
@@ -1207,18 +1207,18 @@ export default function SBTGame() {
           </div>
         </div>
       )}
-
+ 
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-
+ 
         {/* ── HEADER ── */}
         <div style={{background:"#070710",borderBottom:"2px solid #1a1a2e",padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexShrink:0,height:44}}>
-
+ 
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
             <span style={{fontSize:20}}>📺</span>
             <span style={{color:"#e8c840",fontSize:10,letterSpacing:2,textTransform:"uppercase",fontWeight:"bold"}}>SBT Criação Visual</span>
           </div>
-
+ 
           {/* Locks + Música */}
           <div style={{display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             {hasLocks&&<div style={{display:"flex",gap:12}}>
@@ -1242,13 +1242,13 @@ export default function SBTGame() {
             </div>
           </div>
         </div>
-
+ 
         {/* ── BODY ── */}
         <div style={{display:"flex",flex:1,overflow:"hidden"}}>
-
+ 
           {/* ── COLUNA ESQUERDA ── */}
           <div style={{display:"flex",flexDirection:"column",width:"780px",flexShrink:0,overflow:"hidden"}}>
-
+ 
             {/* NAV */}
             <div style={{padding:"4px 8px",background:"#080814",borderBottom:"1px solid #151525",display:"flex",gap:4,flexShrink:0,overflowX:"auto"}}>
               {SCENE_ORDER.map(sid=>{
@@ -1261,11 +1261,11 @@ export default function SBTGame() {
                 );
               })}
             </div>
-
+ 
             {/* ── CENA 780×400 ── */}
             <div style={{position:"relative",width:"780px",height:"400px",flexShrink:0,overflow:"hidden",cursor:"default"}}
               onClick={()=>{ if(openZone) setOpenZone(null); }}>
-
+ 
               {cur.bgImage
                 ? <img src={cur.bgImage} alt={cur.name} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
                 : <div style={{position:"absolute",inset:0,background:cur.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8}}>
@@ -1273,7 +1273,7 @@ export default function SBTGame() {
                     <div style={{color:"#2a2a3a",fontSize:11}}>[ foto do ambiente aqui ]</div>
                   </div>
               }
-
+ 
               {/* Hotspots descritivos */}
               {!isClickScene && (cur.hotspots||[]).map(h=>(
                 <button key={h.id} onClick={e=>{e.stopPropagation();setHotspot(hotspot?.id===h.id?null:h);setNpcMsg(null);}}
@@ -1281,7 +1281,7 @@ export default function SBTGame() {
                   {h.emoji}
                 </button>
               ))}
-
+ 
               {/* NPCs */}
               {!isClickScene&&(cur.npcs||[]).map((nid,ni)=>{
                 const npc=NPCS[nid]; if(!npc) return null;
@@ -1294,7 +1294,7 @@ export default function SBTGame() {
                   </button>
                 );
               })}
-
+ 
               {/* Overlay info */}
               {!isClickScene&&(hotspot||npcMsg)&&(
                 <div style={{position:"absolute",bottom:0,left:0,right:0,background:"rgba(0,0,0,.94)",padding:"8px 14px",borderTop:"1px solid #e8c840",fontSize:11,color:"#ddd",lineHeight:1.5,zIndex:20}}>
@@ -1302,12 +1302,12 @@ export default function SBTGame() {
                   {npcMsg&&!hotspot&&<><strong style={{color:"#a855f7"}}>{npcMsg.npc.emoji} {npcMsg.npc.name}</strong><span style={{color:"#555",fontSize:10}}> — {npcMsg.npc.role}</span><br/><em style={{color:"#ccc"}}>{npcMsg.line}</em></>}
                 </div>
               )}
-
+ 
               {/* Click zones (Identidade Visual) — point & click */}
               {isClickScene&&(cur.clickZones||[]).map(zone=>{
                 const isOpen = openZone?.id===zone.id;
                 const currentDay = days+1;
-
+ 
                 const handleZoneClick = (e) => {
                   e.stopPropagation();
                   // Zona de beber água — ação direta
@@ -1333,14 +1333,18 @@ export default function SBTGame() {
                     setOpenZone(null);
                     return;
                   }
-                  // Zona de ação ou action+fala — toggle menu
+                  // Zona de ação ou action+fala ou action+dia — toggle menu
+                  if(zone.type==="action+dia" && zoneDiaDisabled){ setZonaMsg({text:"⛔ Fechado a partir do 3º dia.", zona:zone.id}); return; }
                   if(isOpen){ setOpenZone(null); setZonaMsg(null); }
                   else { setOpenZone(zone); setZonaMsg(null); }
                 };
-
+ 
                 // Zona de famoso: só renderiza se há famoso disponível e não foi usado
                 if(zone.type==="famoso" && (!famosoAtual || famosoUsado)) return null;
-
+ 
+                // Zona action+dia: não renderiza a partir do maxDay
+                const zoneDiaDisabled = zone.type==="action+dia" && zone.maxDay && currentDay > zone.maxDay;
+ 
                 return (
                   <div key={zone.id}>
                     {/* Imagem do famoso sobreposta na zona */}
@@ -1358,6 +1362,21 @@ export default function SBTGame() {
                         }}
                       />
                     )}
+                    {/* Overlay de fechado para zonas action+dia desativadas */}
+                    {zoneDiaDisabled && (
+                      <div style={{
+                        position:"absolute",
+                        left:`${zone.x}%`, top:`${zone.y}%`,
+                        width:`${zone.w}%`, height:`${zone.h}%`,
+                        background:"rgba(0,0,0,.55)",
+                        zIndex:13, borderRadius:4, cursor:"pointer",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                      }}
+                      onClick={e=>{e.stopPropagation();setZonaMsg({text:"⛔ Fechado a partir do 3º dia.", zona:zone.id});}}
+                      >
+                        <span style={{fontSize:18}}>⛔</span>
+                      </div>
+                    )}
                     <div
                       onClick={handleZoneClick}
                       style={{
@@ -1370,11 +1389,11 @@ export default function SBTGame() {
                         background:isOpen?"rgba(232,200,64,.12)":"transparent",
                         transition:"all .2s", zIndex:15,
                       }}
-                      onMouseEnter={e=>{if(!isOpen){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
+                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
                       onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
                     {/* Menu de ações para zonas do tipo action / action+fala */}
-                    {isOpen&&(zone.type==="action"||zone.type==="action+fala")&&(()=>{
+                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia")&&!zoneDiaDisabled&&(()=>{
                       const zoneActions = cur.actions.filter(a=>(zone.actionIds||[]).includes(a.id));
                       // Se action+fala: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
@@ -1396,10 +1415,10 @@ export default function SBTGame() {
                   </div>
                 );
               })}
-
+ 
               {/* Label */}
               <div style={{position:"absolute",top:7,left:10,background:"rgba(0,0,0,.75)",padding:"3px 10px",borderRadius:4,fontSize:10,color:"#e8c840",letterSpacing:1,fontFamily:"monospace",zIndex:5}}>{cur.emoji} {cur.name}</div>
-
+ 
               {/* Botão água — Editoria (não ID Visual) */}
               {canDrink&&!isClickScene&&(
                 <button onClick={drinkWater}
@@ -1408,7 +1427,7 @@ export default function SBTGame() {
                 </button>
               )}
             </div>
-
+ 
             {/* ── AÇÕES (cenas não-ID-Visual) ── */}
             {!isClickScene&&(
               <div style={{padding:"7px 10px",background:"#080814",flex:1,overflowY:"auto"}}>
@@ -1427,7 +1446,7 @@ export default function SBTGame() {
                 </div>
               </div>
             )}
-
+ 
             {/* ── PAINEL ABAIXO DA CENA (ID Visual) — falas e infos ── */}
             {isClickScene&&(
               <div style={{background:"#080814",flex:1,display:"flex",alignItems:"center",justifyContent:"center",borderTop:"1px solid #0f0f1e",padding:"10px 20px"}}>
@@ -1456,10 +1475,10 @@ export default function SBTGame() {
               </div>
             )}
           </div>
-
+ 
           {/* ── COLUNA DIREITA: status + chat ── */}
           <div style={{flex:1,background:"#0a0a16",borderLeft:"1px solid #151525",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-
+ 
             {/* STATUS */}
             <div style={{padding:"12px 14px 8px",borderBottom:"1px solid #151525",flexShrink:0}}>
               <div style={{fontSize:12,color:"#36f118",letterSpacing:2,marginBottom:9,textTransform:"uppercase",fontWeight:"bold"}}>Status — {name}</div>
@@ -1468,7 +1487,7 @@ export default function SBTGame() {
               <StatBar label="Movimentação"  emoji="🏃" value={stats.mexer}      color="#22c55e" locked={(locks.mexer||0)>0}/>
               <HydSection garrafa={garrafa} agua={agua} canDrinkHere={canDrink}/>
             </div>
-
+ 
             {/* LOG CHAT */}
             <div style={{display:"flex",flexDirection:"column",flex:1,overflow:"hidden"}}>
               <div style={{padding:"5px 12px",background:"#3d7047",borderBottom:"1px solid #2d5037",flexShrink:0}}>
@@ -1477,15 +1496,15 @@ export default function SBTGame() {
               <ChatLog log={log}/>
             </div>
           </div>
-
+ 
         </div>
-
+ 
         {/* ── RODAPÉ: relógio + timeline ── */}
         <div style={{background:"#070710",borderTop:"2px solid #1a1a2e",padding:"0 14px",display:"flex",alignItems:"center",gap:12,flexShrink:0,height:52}}>
-
+ 
           {/* Ícone analógico 30% maior */}
           <span style={{fontSize:39,flexShrink:0,lineHeight:1}}>🕐</span>
-
+ 
           {/* DIA fora do box + Horário digital */}
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0,gap:1}}>
             <span style={{fontSize:12,fontWeight:"bold",color:"#36f118",fontFamily:"'Courier New',monospace",letterSpacing:2,textTransform:"uppercase",lineHeight:1}}>DIA {days+1}</span>
@@ -1493,7 +1512,7 @@ export default function SBTGame() {
               <span style={{fontSize:20,fontWeight:"bold",color:"#fff",fontFamily:"'Courier New',monospace",letterSpacing:3,lineHeight:1}}>{lbl}</span>
             </div>
           </div>
-
+ 
           {/* Timeline ENTRADA → SAÍDA ocupando toda a largura restante */}
           <div style={{display:"flex",alignItems:"center",gap:6,flex:1,overflow:"hidden"}}>
             <span style={{fontSize:8,color:"#868695",fontFamily:"monospace",letterSpacing:1,textTransform:"uppercase",flexShrink:0}}>ENTRADA</span>
@@ -1505,9 +1524,9 @@ export default function SBTGame() {
             </div>
             <span style={{fontSize:8,color:"#868695",fontFamily:"monospace",letterSpacing:1,textTransform:"uppercase",flexShrink:0}}>SAÍDA</span>
           </div>
-
+ 
         </div>
-
+ 
       </div>
     </div>
     </div>
