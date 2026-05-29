@@ -156,13 +156,13 @@ const SCENES = {
     hotspots:[],
     clickZones:[
       {
-        id:"zona1", label:"Casa do Pão de Quê?", emoji:"☕",
+        id:"zona1", label:"Padoca", emoji:"☕",
         x:0, y:22, w:18, h:68,
         type:"action",
         actionIds:["cafe_praca"],
       },
       {
-        id:"zona2", label:"Suchi Colorido", emoji:"🧆",
+        id:"zona2", label:"Casa do Pão de Quê?", emoji:"🧆",
         x:18, y:26, w:14, h:42,
         type:"action+dia",  // indisponível a partir do dia 3
         actionIds:["cafe_caro"],
@@ -176,7 +176,7 @@ const SCENES = {
       },
       {
         id:"zona4", label:"Mesas", emoji:"🧘",
-        x:32, y:35, w:38, h:55,
+        x:32, y:35, w:38, h:35,
         type:"action",
         actionIds:["almoco_rapido","mesa_quieta"],
       },
@@ -200,7 +200,7 @@ const SCENES = {
     ],
     actions:[
       {id:"cafe_praca",    label:"Tomar um café",                      emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café da praça. Fraco mas quente. Funciona."},
-      {id:"cafe_caro",     label:"Tomar um café (caro)",               emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café especial. Caro. Mas admita: o copo era bonito."},
+      {id:"cafe_caro",     label:"Tomar um café só que mais caro",               emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café especial. Caro. Mas admita: o copo era bonito."},
       {id:"almoco_rapido", label:"Almoço rápido (cheio e barulhento)", emoji:"🍱", time:2, effects:{criar:0,  mexer:+20, socializar:+50}, availFrom:"11:30", availUntil:"15:30", msg:"Você almoçou com 200 pessoas gritando. A comida estava ok. Seus ouvidos, não."},
       {id:"mesa_quieta",   label:"Achar uma mesa pra sentar",          emoji:"🧘", time:4, effects:{criar:0,  mexer:+30, socializar:+30}, availFrom:"11:30", availUntil:"15:30", msg:"Você achou um cantinho tranquilo. Comeu devagar. Isso deveria ser mais comum."},
       {id:"foto_famoso",   label:"Tirar foto com famoso",              emoji:"📸", time:2, special:"foto_famoso", effects:{}, msg:""},
