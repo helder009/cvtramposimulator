@@ -1,5 +1,62 @@
 import { useState, useEffect, useRef } from "react";
  
+// ── RANKING GLOBAL (Supabase) ───────────────────────────────────────────────────
+// Configure suas credenciais do Supabase abaixo. Enquanto não configurar,
+// o jogo usa um ranking em memória (funciona no preview do Claude, mas não
+// persiste). Veja RANKING_SETUP.md para o passo a passo.
+const SUPABASE_URL      = "https://tcgrfkdlwtzirlxxbzcm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_3k7-4ft7b7KLTAcUfTV6dA_b5uNKna2";
+ 
+const _SB_TABLE = "ranking";
+const _SB_REST  = `${SUPABASE_URL}/rest/v1/${_SB_TABLE}`;
+const _SB_HEADERS = {
+  "Content-Type": "application/json",
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+};
+const _sbConfigured = () =>
+  SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("SEU-PROJETO") &&
+  SUPABASE_ANON_KEY.length > 20 && !SUPABASE_ANON_KEY.includes("SUA_CHAVE");
+ 
+// Fallback em memória (só dura a sessão) — usado quando o Supabase não está configurado
+let _memRanking = [];
+ 
+async function fetchRanking() {
+  if(!_sbConfigured()){
+    return [..._memRanking].sort((a,b)=>b.totalMin-a.totalMin).slice(0,20);
+  }
+  try {
+    const res = await fetch(`${_SB_REST}?select=*&order=total_min.desc&limit=20`, { headers:_SB_HEADERS });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.map(r=>({
+      name:r.name, days:r.days, extraTurns:r.extra_turns,
+      totalMin:r.total_min, survived:r.survived, calango:r.calango, date:r.date,
+    }));
+  } catch(e){ console.error("[ranking] fetch:", e); return []; }
+}
+ 
+async function submitScore(entry) {
+  if(!_sbConfigured()){
+    _memRanking.push(entry);
+    return [..._memRanking].sort((a,b)=>b.totalMin-a.totalMin).slice(0,20);
+  }
+  try {
+    const payload = {
+      name:entry.name, days:entry.days, extra_turns:entry.extraTurns,
+      total_min:entry.totalMin, survived:entry.survived, calango:entry.calango, date:entry.date,
+    };
+    const res = await fetch(_SB_REST, {
+      method:"POST",
+      headers:{ ..._SB_HEADERS, "Prefer":"return=minimal" },
+      body:JSON.stringify(payload),
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await fetchRanking();
+  } catch(e){ console.error("[ranking] submit:", e); return null; }
+}
+ 
+ 
 // ── CONSTANTES ────────────────────────────────────────────────────────────────
 const TOTAL_TURNS = 38;
 const TURN_MIN    = 15;
@@ -155,8 +212,8 @@ const SCENES = {
     npcs:[],
     hotspots:[],
     clickZones:[
-      { id:"zona1", label:"Casa do Pão de Quê?", emoji:"☕", x:1, y:36, w:14, h:47, type:"action", actionIds:["cafe_praca"] },
-      { id:"zona2", label:"Suchi Colorido", emoji:"🧆", x:19, y:35, w:12, h:25, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
+      { id:"zona1", label:"Padoca", emoji:"☕", x:1, y:36, w:14, h:47, type:"action", actionIds:["cafe_praca"] },
+      { id:"zona2", label:"Casa do Pão de Quê?", emoji:"🧆", x:19, y:35, w:12, h:25, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
       { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:16, y:70, w:12, h:14, type:"action", actionIds:["ir_calango"] },
       { id:"zona4", label:"Mesas", emoji:"🧘", x:39, y:52, w:33, h:26, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
       { id:"zona5", label:"Famoso", emoji:"📸", x:75, y:45, w:12, h:40, type:"famoso", actionIds:["foto_famoso"] },
@@ -172,7 +229,7 @@ const SCENES = {
     ],
     actions:[
       {id:"cafe_praca",    label:"Tomar um café",                      emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café da praça. Fraco mas quente. Funciona."},
-      {id:"cafe_caro",     label:"Tomar um café (caro)",               emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café especial. Caro. Mas admita: o copo era bonito."},
+      {id:"cafe_caro",     label:"Tomar um café, só que mais caro",     emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café especial. Caro. Mas admita: o copo era bonito."},
       {id:"almoco_rapido", label:"Almoço rápido (cheio e barulhento)", emoji:"🍱", time:2, effects:{criar:0,  mexer:+20, socializar:+50}, availFrom:"11:30", availUntil:"15:30", msg:"Você almoçou com 200 pessoas gritando. A comida estava ok. Seus ouvidos, não."},
       {id:"mesa_quieta",   label:"Achar uma mesa pra sentar",          emoji:"🧘", time:4, effects:{criar:0,  mexer:+30, socializar:+30}, availFrom:"11:30", availUntil:"15:30", msg:"Você achou um cantinho tranquilo. Comeu devagar. Isso deveria ser mais comum."},
       {id:"foto_famoso",   label:"Tirar foto com famoso",              emoji:"📸", time:2, special:"foto_famoso", effects:{}, msg:""},
@@ -278,7 +335,7 @@ const SCENES = {
       { id:"zona3", label:"Flipchart", emoji:"📋", x:40, y:35, w:8, h:25,
         type:"action", actionIds:["trocar_ideia","fazer_laboral"],
       },
-      { id:"zona4", label:"Kell", emoji:"✨", x:63, y:42, w:13, h:26,
+      { id:"zona4", label:"Kell", emoji:"✨", x:63, y:42, w:13, h:26, menuSide:"left",
         type:"action+fala", actionIds:["papo_kell"],
         falas:[
           { text:"Gente, que time incrível. Amo trabalhar aqui.", minDay:1 },
@@ -307,7 +364,7 @@ const SCENES = {
       {id:"fazer_leds",       label:"Fazer artes pros LEDs",        emoji:"💡", time:16, effects:{criar:+50,mexer:-50,socializar:+10}, msg:"4 horas nos painéis LED. Seus olhos são agora parte do monitor."},
       {id:"fazer_ilustracao", label:"Fazer uma ilustração",         emoji:"🖌️", time:8,  effects:{criar:+30,mexer:-30,socializar:+10}, msg:"2 horas de ilustração. A mão dói, mas a arte... quase presta."},
       {id:"trocar_ideia",     label:"Trocar ideia com amiguinho",   emoji:"💬", time:2,  effects:{criar:-10,mexer:0,  socializar:+20}, msg:"Começou sobre trabalho, virou papo sobre série. Clássico."},
-      {id:"fazer_laboral",    label:"Fazer laboral improvisado",    emoji:"🧘", time:1,  effects:{criar:-10,mexer:+70,socializar:+30}, msg:"Laboral improvisado. Estalos, alongamentos e aquela sensação de estar vivo."},
+      {id:"fazer_laboral",    label:"Fazer laboral improvisado",    emoji:"🧘", time:1,  availDay:2, effects:{criar:-10,mexer:+70,socializar:+30}, msg:"Laboral improvisado. Estalos, alongamentos e aquela sensação de estar vivo."},
       {id:"papo_kell",        label:"Papo com a Kell ✨",            emoji:"✨", time:2,  effects:{criar:+10,mexer:-10,socializar:+40}, msg:"Kell te elogiou e te fez sentir a pessoa mais talentosa do SBT."},
       {id:"cafe_edit",        label:"Tomar um café",                emoji:"☕", time:1,  effects:{criar:+5, mexer:0,  socializar:+5},  msg:"O café da Editoria. Sem explicação, só gratidão."},
       {id:"meme_jess",        label:"Mandar meme pra Jess",         emoji:"😂", time:2,  effects:{criar:+1, mexer:-1, socializar:+20}, msg:"Jess deu uma risada alta demais. Todo mundo olhou. Valeu cada segundo."},
@@ -477,7 +534,7 @@ const ChatLog = ({ log }) => {
 };
  
 // Botão de ação reutilizável com contador de uso
-const ActionBtn = ({ a, locked, unavail, exhausted, usageCount, limit, onAction }) => {
+const ActionBtn = ({ a, locked, unavail, dayLocked, exhausted, usageCount, limit, onAction }) => {
   const disabled = locked||unavail||exhausted;
   const remaining = limit !== undefined ? limit - (usageCount||0) : null;
   let tl = "instantâneo";
@@ -494,10 +551,11 @@ const ActionBtn = ({ a, locked, unavail, exhausted, usageCount, limit, onAction 
         <span style={{display:"block"}}>
           {a.label}
           {locked&&<span style={{fontSize:8,color:"#ff4444",marginLeft:4}}>🔒</span>}
-          {unavail&&<span style={{fontSize:8,color:"#7a5500",marginLeft:4}}>🕐{a.availFrom}{a.availUntil?`–${a.availUntil}`:""}</span>}
+          {unavail&&!dayLocked&&<span style={{fontSize:8,color:"#7a5500",marginLeft:4}}>🕐{a.availFrom}{a.availUntil?`–${a.availUntil}`:""}</span>}
+          {dayLocked&&<span style={{fontSize:8,color:"#7a5500",marginLeft:4}}>🔒 Dia {a.availDay}+</span>}
           {exhausted&&<span style={{fontSize:8,color:"#3a5a3a",marginLeft:4}}>✓ esgotado</span>}
         </span>
-        <span style={{fontSize:9,color:"#444",display:"block",display:"flex",gap:6}}>
+        <span style={{fontSize:9,color:"#444",display:"flex",gap:6}}>
           <span>{tl}</span>
           {remaining!==null&&<span style={{color:remaining<=1?"#f59e0b":remaining===0?"#555":"#556"}}>{remaining} restante{remaining!==1?"s":""}</span>}
         </span>
@@ -507,12 +565,16 @@ const ActionBtn = ({ a, locked, unavail, exhausted, usageCount, limit, onAction 
 };
  
 // Menu popup para Identidade Visual
-const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimit, onAction, onClose }) => {
+const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimit, days, onAction, onClose }) => {
+  // Por padrão o menu abre à direita da zona; se menuSide==="left", abre à esquerda (fora da área)
+  const openLeft = zone.menuSide === "left";
+  const posStyle = openLeft
+    ? { right:`${Math.min(100 - zone.x + 1, 58)}%`, top:`${Math.max(5, zone.y-5)}%` }
+    : { left:`${Math.min(zone.x+zone.w+1, 58)}%`,  top:`${Math.max(5, zone.y-5)}%` };
   return (
     <div onClick={e=>e.stopPropagation()} style={{
       position:"absolute",
-      left:`${Math.min(zone.x+zone.w+1, 58)}%`,
-      top:`${Math.max(5, zone.y-5)}%`,
+      ...posStyle,
       background:"rgba(6,6,18,.97)",
       border:"1px solid #e8c840",
       borderRadius:10,
@@ -525,13 +587,14 @@ const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimi
       {actions.map(a=>{
         const cat = ACTION_CAT[a.id];
         const locked = cat && (locks[cat]||0)>0;
-        const unavail = a.availFrom && shiftCfg && turn < timeToTurn(a.availFrom, shiftCfg.startH, shiftCfg.startM);
+        const dayLocked = a.availDay && (days+1) < a.availDay;
+        const unavail = dayLocked || (a.availFrom && shiftCfg && turn < timeToTurn(a.availFrom, shiftCfg.startH, shiftCfg.startM));
         const limit = getLimit(a.id);
         const usageCount = usageCounts[a.id]||0;
         const exhausted = limit!==undefined && usageCount>=limit;
         return (
           <div key={a.id} style={{marginBottom:5}}>
-            <ActionBtn a={a} locked={locked} unavail={unavail} exhausted={exhausted} usageCount={usageCount} limit={limit} onAction={onAction}/>
+            <ActionBtn a={a} locked={locked} unavail={unavail} dayLocked={dayLocked} exhausted={exhausted} usageCount={usageCount} limit={limit} onAction={onAction}/>
           </div>
         );
       })}
@@ -540,8 +603,75 @@ const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimi
   );
 };
  
+// ── HELPERS DE PONTUAÇÃO (globais) ─────────────────────────────────────────────
+function calcScoreGlobal(completedDays, wonTurns) {
+  const totalMin = completedDays * 570 + wonTurns * 15;
+  const d = Math.floor(totalMin / 570);
+  const remainMin = totalMin % 570;
+  const h = Math.floor(remainMin / 60);
+  const m = remainMin % 60;
+  return { totalMin, d, h, m };
+}
+ 
+function formatTimeGlobal(d, h, m) {
+  const parts = [];
+  if(d>0) parts.push(`${d} dia${d!==1?"s":""}`);
+  if(h>0) parts.push(`${h}h`);
+  if(m>0) parts.push(`${m}min`);
+  return parts.length>0 ? parts.join(" e ") : "menos de 1min";
+}
+ 
+// ── TELA DE RANKING (reutilizável) ─────────────────────────────────────────────
+const RankingScreen = ({ ranking, loading, onBack, highlightName, highlightMin, W, OUTER, INNER }) => {
+  const medals = ["🥇","🥈","🥉"];
+  return (
+    <div style={OUTER}><div style={INNER}><div style={{...W,background:"linear-gradient(135deg,#0a0a18,#12122a,#0a0a18)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"30px 24px"}}>
+      <div style={{width:"100%",maxWidth:560,display:"flex",flexDirection:"column",height:"100%"}}>
+ 
+        <div style={{textAlign:"center",marginBottom:16,flexShrink:0}}>
+          <div style={{fontSize:42,marginBottom:4}}>🏅</div>
+          <h1 style={{color:"#e8c840",fontSize:22,fontFamily:"monospace",letterSpacing:2,margin:0,textTransform:"uppercase"}}>Ranking Global</h1>
+          <div style={{fontSize:10,color:"#555",fontFamily:"monospace",letterSpacing:1,marginTop:4}}>Top 20 sobreviventes do SBT</div>
+        </div>
+ 
+        <div style={{flex:1,overflowY:"auto",background:"#06060f",border:"1px solid #1a1a2e",borderRadius:12,padding:"12px 14px",minHeight:0}}>
+          {loading&&<div style={{color:"#555",fontSize:12,textAlign:"center",fontFamily:"monospace",padding:"40px 0"}}>Carregando ranking...</div>}
+          {!loading&&ranking.length===0&&<div style={{color:"#444",fontSize:12,textAlign:"center",fontFamily:"monospace",padding:"40px 0"}}>Nenhum registro ainda.<br/>Seja o primeiro a aparecer aqui! 🎮</div>}
+          {!loading&&ranking.map((r,i)=>{
+            const s = calcScoreGlobal(r.days, r.extraTurns);
+            const isMe = highlightName && r.name===highlightName && r.totalMin===highlightMin;
+            return (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:isMe?"#1a1a08":(i<3?"#0f0f20":"#0b0b16"),border:`1px solid ${isMe?"#e8c840":(i<3?"#2a2a3a":"#141425")}`,borderRadius:9,marginBottom:6}}>
+                <span style={{fontSize:16,flexShrink:0,width:28,textAlign:"center",fontFamily:"monospace",fontWeight:"bold",color:i<3?"#e8c840":"#555"}}>{medals[i]||`${i+1}`}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,color:isMe?"#e8c840":"#ddd",fontFamily:"monospace",fontWeight:"bold",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {r.name} {r.calango?"🦎":""}{isMe?" ←":""}
+                  </div>
+                  <div style={{fontSize:10,color:"#666",marginTop:2,fontFamily:"monospace"}}>
+                    {formatTimeGlobal(s.d,s.h,s.m)} · {r.date}
+                  </div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontSize:13,color:r.survived?"#22c55e":"#ff6666",fontFamily:"monospace",fontWeight:"bold"}}>
+                    {r.days} dia{r.days!==1?"s":""}
+                  </div>
+                  <div style={{fontSize:8,color:"#444",fontFamily:"monospace"}}>{r.survived?"✓ concluído":"✗ derrota"}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+ 
+        <button onClick={onBack} style={{marginTop:16,flexShrink:0,background:"#e8c840",color:"#000",border:"none",padding:"12px",borderRadius:8,cursor:"pointer",fontSize:13,fontFamily:"monospace",fontWeight:"bold",letterSpacing:2,textTransform:"uppercase"}}>
+          ← Voltar à Tela Inicial
+        </button>
+      </div>
+    </div></div></div>
+  );
+};
+ 
 // ── INTRO ─────────────────────────────────────────────────────────────────────
-const Intro = ({ onStart, musicOn, setMusicOn, volume, setVolume, audioRef }) => {
+const Intro = ({ onStart, onRanking }) => {
   const [nome, setNome] = useState("");
   const [shift, setShift] = useState(null);
   return (
@@ -597,7 +727,7 @@ const Intro = ({ onStart, musicOn, setMusicOn, volume, setVolume, audioRef }) =>
             style={{flex:1,background:(nome.trim()&&shift)?"#e8c840":"#222",color:(nome.trim()&&shift)?"#000":"#555",border:"none",padding:"11px 20px",borderRadius:8,cursor:(nome.trim()&&shift)?"pointer":"not-allowed",fontSize:13,fontFamily:"monospace",fontWeight:"bold",letterSpacing:2,textTransform:"uppercase",transition:"all 0.2s"}}>
             Bater o Ponto →
           </button>
-          <button title="Ranking"
+          <button title="Ranking" onClick={onRanking}
             style={{background:"#0d0d18",border:"1px solid #2a2a3a",borderRadius:8,padding:"11px 14px",cursor:"pointer",fontSize:18,transition:"all .2s",color:"#e8c840"}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor="#e8c840";e.currentTarget.style.background="#1a1a08";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a3a";e.currentTarget.style.background="#0d0d18";}}>
@@ -618,7 +748,7 @@ export default function SBTGame() {
   const [turnLabels, setTurnLabels]   = useState([]);
   const [turn, setTurn]               = useState(0);
   const [scene, setScene]             = useState("praca");
-  const [stats, setStats]             = useState({criar:40,socializar:40,mexer:40});
+  const [stats, setStats]             = useState({criar:60,socializar:60,mexer:60});
   const [agua, setAgua]               = useState(70);    // hidratação corporal
   const [garrafa, setGarrafa]         = useState(100);   // garrafa cheia = 100%
   const [log, setLog]                 = useState([]);
@@ -640,6 +770,7 @@ export default function SBTGame() {
   const [totalTurnsWon, setTotalTurnsWon] = useState(0);
   const [ranking, setRanking]         = useState([]);
   const [showRanking, setShowRanking] = useState(false);
+  const [rankingLoading, setRankingLoading] = useState(false);
   const [famosoAtual, setFamosoAtual] = useState(null);   // famoso disponível hoje na praça
   const [famosoUsado, setFamosoUsado] = useState(false);  // já tirou foto hoje
   const audioRef                      = useRef(null);
@@ -648,9 +779,9 @@ export default function SBTGame() {
   const getInitialStats = (d) => {
     // d = expedientes já completos (0 = primeiro dia ainda)
     const day = d + 1; // dia atual (1-based)
-    if(day === 1) return { criar:40, socializar:40, mexer:40 };
-    if(day === 2) return { criar:30, socializar:30, mexer:30 };
-    const base = Math.max(2, 28 - (day - 3) * 2); // dia 3=28, dia 4=26, dia 5=24...
+    if(day === 1) return { criar:60, socializar:60, mexer:60 };
+    if(day === 2) return { criar:50, socializar:50, mexer:50 };
+    const base = Math.max(2, 40 - (day - 3) * 2); // dia 3=40, dia 4=38, dia 5=36...
     return { criar:base, socializar:base, mexer:base };
   };
  
@@ -669,13 +800,11 @@ export default function SBTGame() {
   },[phase, days]);
  
   // ── RANKING ────────────────────────────────────────────────────────────────
-  // Carrega ranking do storage compartilhado ao montar
+  // Carrega ranking global ao montar
   useEffect(()=>{
     (async()=>{
-      try {
-        const res = await window.storage.get("sbt-ranking", true);
-        if(res) setRanking(JSON.parse(res.value));
-      } catch(e) { setRanking([]); }
+      const data = await fetchRanking();
+      setRanking(data);
     })();
   },[]);
  
@@ -703,15 +832,12 @@ export default function SBTGame() {
       calango: calangoPassed,
       date: new Date().toLocaleDateString("pt-BR"),
     };
-    try {
-      const res = await window.storage.get("sbt-ranking", true);
-      const current = res ? JSON.parse(res.value) : [];
-      const updated = [...current, entry]
-        .sort((a,b) => b.totalMin - a.totalMin)
-        .slice(0, 20); // top 20
-      await window.storage.set("sbt-ranking", JSON.stringify(updated), true);
-      setRanking(updated);
-    } catch(e) {}
+    const updated = await submitScore(entry);
+    if(updated) setRanking(updated);
+    else {
+      // fallback local se o servidor falhar — mostra ao menos a sessão atual
+      setRanking(prev => [...prev, entry].sort((a,b)=>b.totalMin-a.totalMin).slice(0,20));
+    }
   };
  
   // Música de fundo
@@ -817,6 +943,7 @@ export default function SBTGame() {
   const isActionLocked = (id) => { const cat=ACTION_CAT[id]; return cat&&(locks[cat]||0)>0; };
  
   const isAvail = (a) => {
+    if(a.availDay && (days+1) < a.availDay) return false;
     if(!shiftCfg) return true;
     if(a.availFrom && turn < timeToTurn(a.availFrom, shiftCfg.startH, shiftCfg.startM)) return false;
     if(a.availUntil && turn > timeToTurn(a.availUntil, shiftCfg.startH, shiftCfg.startM)) return false;
@@ -922,7 +1049,7 @@ export default function SBTGame() {
   useEffect(()=>{
     if(phase!=="game") return;
     const all={...stats,agua};
-    const labels={criar:"Criatividade zerou",socializar:"Socialização zerou",mexer:"Movimentação zerou",agua:"Desidratação"};
+    const labels={criar:"Sem criatividade",socializar:"Sem socialização",mexer:"Sem movimentação",agua:"Desidratação"};
     const dead=Object.entries(all).find(([,v])=>v<=0);
     if(dead){
       setEndReason(labels[dead[0]]);
@@ -938,7 +1065,7 @@ export default function SBTGame() {
  
   const resetGame = ()=>{
     setPhase("intro");setTurn(0);setScene("praca");
-    setStats({criar:40,socializar:40,mexer:40});setAgua(70);setGarrafa(100);
+    setStats({criar:60,socializar:60,mexer:60});setAgua(70);setGarrafa(100);
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
     setLocks({});setCritModal(null);setOpenZone(null);setUsageCounts({});
@@ -960,7 +1087,27 @@ export default function SBTGame() {
     setPhase("game");
   };
  
-  const handleStart=(n,s)=>{ setName(n);setShiftCfg(s);setTurnLabels(genLabels(s.startH,s.startM));setPhase("game"); };
+  const handleStart=(n,s)=>{
+    // Reseta todo o estado de jogo antes de iniciar (evita log/stats do jogo anterior)
+    setTurn(0); setScene("praca");
+    setStats({criar:60,socializar:60,mexer:60}); setAgua(70); setGarrafa(100);
+    setLog([]); setHotspot(null); setNpcMsg(null); setEndReason(null);
+    setCalangoPassed(false); setWarned({});
+    setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
+    setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
+    setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
+    // Configura o novo jogo
+    setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
+    setPhase("game");
+  };
+ 
+  const openRanking = async () => {
+    setRankingLoading(true);
+    setPhase("ranking");
+    const data = await fetchRanking();
+    setRanking(data);
+    setRankingLoading(false);
+  };
  
   // ── LAYOUT RESPONSIVO ─────────────────────────────────────────────────────
   // O jogo foi desenhado em 1280×720. Escalamos proporcionalmente para caber
@@ -1001,8 +1148,19 @@ export default function SBTGame() {
   if(phase==="intro") return (
     <div style={OUTER}><div style={INNER}><div style={W}>
       <audio ref={audioRef} src="https://res.cloudinary.com/dio7kf0tb/video/upload/v1777134013/Mofadinho_Salgado___Game_V4_ijxoys.mp3" loop preload="auto"/>
-      <Intro onStart={handleStart} musicOn={musicOn} setMusicOn={setMusicOn} volume={volume} setVolume={setVolume} audioRef={audioRef}/>
+      <Intro onStart={handleStart} onRanking={openRanking}/>
     </div></div></div>
+  );
+ 
+  if(phase==="ranking") return (
+    <RankingScreen
+      ranking={ranking}
+      loading={rankingLoading}
+      onBack={()=>setPhase("intro")}
+      highlightName={name}
+      highlightMin={calcScore(days, endReason?turn:TOTAL_TURNS).totalMin}
+      W={W} OUTER={OUTER} INNER={INNER}
+    />
   );
  
   if(phase==="nextday"){
@@ -1044,7 +1202,6 @@ export default function SBTGame() {
   if(phase==="end"){
     const survived = !endReason;
     const score = calcScore(days, survived ? TOTAL_TURNS : turn);
-    const myRankPos = ranking.findIndex(r=>r.name===name&&r.totalMin===score.totalMin);
  
     const formatTime = (d,h,m) => {
       const parts=[];
@@ -1056,16 +1213,22 @@ export default function SBTGame() {
  
     return (
       <div style={OUTER}><div style={INNER}><div style={{...W,background:survived?"linear-gradient(135deg,#001500,#002000)":"linear-gradient(135deg,#150000,#200000)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-        <div style={{width:"100%",maxWidth:900,padding:"0 24px",display:"flex",gap:20,alignItems:"flex-start",justifyContent:"center"}}>
+        <div style={{width:"100%",maxWidth:440,padding:"0 24px",textAlign:"center"}}>
  
-          {/* Coluna esquerda: resultado */}
-          <div style={{flex:"0 0 380px",textAlign:"center"}}>
+          <div>
             <div style={{fontSize:56,marginBottom:8}}>{survived?"🏆":"😵"}</div>
             <div style={{fontSize:9,color:"#e8c840",letterSpacing:4,textTransform:"uppercase",marginBottom:4,fontFamily:"monospace"}}>{survived?"Expediente concluído!":"Fim de expediente"}</div>
             <h2 style={{color:survived?"#66ff66":"#ff6666",fontSize:20,marginBottom:8,fontFamily:"monospace",lineHeight:1.3}}>
               {survived?`${name} se aposentou no SBT!`:`${name} não resistiu`}
             </h2>
-            {!survived&&<p style={{color:"#666",fontSize:11,marginBottom:10,fontFamily:"sans-serif"}}>{endReason}</p>}
+            {!survived&&(
+              <div style={{margin:"6px auto 14px",display:"inline-block",background:"#2a0808",border:"2px solid #ff4444",borderRadius:8,padding:"8px 20px"}}>
+                <div style={{fontSize:9,color:"#ff8888",letterSpacing:2,textTransform:"uppercase",marginBottom:2,fontFamily:"monospace"}}>Causa da derrota</div>
+                <div style={{fontSize:20,color:"#ff4444",fontWeight:"bold",fontFamily:"monospace",letterSpacing:1,textTransform:"uppercase"}}>
+                  {endReason}!
+                </div>
+              </div>
+            )}
  
             {/* PLACAR */}
             <div style={{background:"#0d0d18",border:"2px solid #e8c840",borderRadius:12,padding:"16px 20px",marginBottom:14,textAlign:"center"}}>
@@ -1093,43 +1256,11 @@ export default function SBTGame() {
               <button onClick={resetGame} style={{background:"#e8c840",color:"#000",border:"none",padding:"10px 20px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"monospace",fontWeight:"bold"}}>
                 🔄 Novo Expediente
               </button>
-              <button onClick={()=>setShowRanking(p=>!p)} style={{background:"#1a1a2e",color:"#e8c840",border:"1px solid #e8c840",padding:"10px 20px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"monospace"}}>
-                🏅 {showRanking?"Ocultar":"Ver"} Ranking
+              <button onClick={openRanking} style={{background:"#1a1a2e",color:"#e8c840",border:"1px solid #e8c840",padding:"10px 20px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"monospace"}}>
+                🏅 Ver Ranking
               </button>
             </div>
           </div>
- 
-          {/* Coluna direita: ranking */}
-          {showRanking&&(
-            <div style={{flex:"0 0 340px",background:"#0a0a16",border:"1px solid #1a1a2e",borderRadius:12,padding:"14px 16px",maxHeight:460,overflowY:"auto"}}>
-              <div style={{fontSize:9,color:"#e8c840",letterSpacing:3,textTransform:"uppercase",marginBottom:12,fontFamily:"monospace",textAlign:"center"}}>🏅 Ranking — Top Sobreviventes</div>
-              {ranking.length===0&&<div style={{color:"#333",fontSize:11,textAlign:"center",fontFamily:"monospace",padding:"20px 0"}}>Nenhum registro ainda.<br/>Seja o primeiro!</div>}
-              {ranking.map((r,i)=>{
-                const s=calcScore(r.days, r.extraTurns);
-                const medals=["🥇","🥈","🥉"];
-                const isMe = r.name===name&&r.totalMin===score.totalMin&&i===myRankPos;
-                return (
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",background:isMe?"#1a1a08":"#0d0d18",border:`1px solid ${isMe?"#e8c840":"#151525"}`,borderRadius:8,marginBottom:5}}>
-                    <span style={{fontSize:14,flexShrink:0,width:22,textAlign:"center"}}>{medals[i]||`${i+1}`}</span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:11,color:isMe?"#e8c840":"#ccc",fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                        {r.name} {r.calango?"🦎":""}{isMe?" ←":""}
-                      </div>
-                      <div style={{fontSize:9,color:"#555",marginTop:1}}>
-                        {formatTime(s.d,s.h,s.m)} · {r.date}
-                      </div>
-                    </div>
-                    <div style={{textAlign:"right",flexShrink:0}}>
-                      <div style={{fontSize:11,color:r.survived?"#22c55e":"#ff6666",fontFamily:"monospace",fontWeight:"bold"}}>
-                        {r.days} dia{r.days!==1?"s":""}
-                      </div>
-                      <div style={{fontSize:8,color:"#333"}}>{r.survived?"✓ concluído":"✗ derrota"}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
  
         </div>
       </div></div></div>
@@ -1286,6 +1417,11 @@ export default function SBTGame() {
                   e.stopPropagation();
                   // Zona de beber água — ação direta
                   if(zone.type==="drink"){
+                    if(garrafa<=0){
+                      setZonaMsg({text:"🪣 Garrafa vazia! Encha no corredor.", zona:zone.id});
+                      setOpenZone(null);
+                      return;
+                    }
                     drinkWater();
                     setZonaMsg({text:"💧 Você bebeu água!", zona:zone.id});
                     setOpenZone(null);
@@ -1369,7 +1505,10 @@ export default function SBTGame() {
                     />
                     {/* Menu de ações para zonas do tipo action / action+fala */}
                     {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia")&&!zoneDiaDisabled&&(()=>{
-                      const zoneActions = cur.actions.filter(a=>(zone.actionIds||[]).includes(a.id));
+                      const zoneActions = cur.actions.filter(a=>
+                        (zone.actionIds||[]).includes(a.id) &&
+                        !(a.availDay && (days+1) < a.availDay)  // oculta ações ainda não liberadas por dia
+                      );
                       // Se action+fala: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
                         if(zone.type==="action+fala"&&zone.falas){
@@ -1385,7 +1524,7 @@ export default function SBTGame() {
                         }
                         doAction(a);
                       };
-                      return <ActionMenu zone={zone} actions={zoneActions} locks={locks} shiftCfg={shiftCfg} turn={turn} usageCounts={usageCounts} getLimit={getLimit} onAction={onZoneAction} onClose={()=>{setOpenZone(null);setZonaMsg(null);}}/>;
+                      return <ActionMenu zone={zone} actions={zoneActions} locks={locks} shiftCfg={shiftCfg} turn={turn} usageCounts={usageCounts} getLimit={getLimit} days={days} onAction={onZoneAction} onClose={()=>{setOpenZone(null);setZonaMsg(null);}}/>;
                     })()}
                   </div>
                 );
