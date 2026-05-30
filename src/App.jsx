@@ -155,12 +155,12 @@ const SCENES = {
     npcs:[],
     hotspots:[],
     clickZones:[
-      { id:"zona1", label:"Casa do Pão de Quê?", emoji:"☕", x:0, y:22, w:18, h:68, cx:9, cy:56, type:"action", actionIds:["cafe_praca"] },
-      { id:"zona2", label:"Suchi Colorido", emoji:"🧆", x:18, y:26, w:14, h:42, cx:25, cy:47, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
-      { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:18, y:68, w:14, h:28, cx:25, cy:82, type:"action", actionIds:["ir_calango"] },
-      { id:"zona4", label:"Mesas", emoji:"🧘", x:32, y:35, w:38, h:55, cx:51, cy:62, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
-      { id:"zona5", label:"Famoso", emoji:"📸", x:70, y:28, w:18, h:62, cx:79, cy:59, type:"famoso", actionIds:["foto_famoso"] },
-      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:70, y:10, w:18, h:22, cx:79, cy:21,
+      { id:"zona1", label:"Casa do Pão de Quê?", emoji:"☕", x:1, y:36, w:14, h:47, type:"action", actionIds:["cafe_praca"] },
+      { id:"zona2", label:"Suchi Colorido", emoji:"🧆", x:19, y:35, w:12, h:25, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
+      { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:16, y:70, w:12, h:14, type:"action", actionIds:["ir_calango"] },
+      { id:"zona4", label:"Mesas", emoji:"🧘", x:39, y:52, w:33, h:26, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
+      { id:"zona5", label:"Famoso", emoji:"📸", x:75, y:45, w:12, h:40, type:"famoso", actionIds:["foto_famoso"] },
+      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:73, y:26, w:9, h:14,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
@@ -189,7 +189,7 @@ const SCENES = {
     clickZones:[
       {
         id:"zona1", label:"Mascote", emoji:"🟡",
-        x:0, y:37, w:17, h:55, cx:8, cy:64,
+        x:2, y:44, w:15, h:40,
         type:"fala",
         falas:[
           { text:"Vai lá Brasil!", minDay:1 },
@@ -199,7 +199,7 @@ const SCENES = {
       },
       {
         id:"zona2", label:"Hélder", emoji:"👨‍💼",
-        x:17, y:37, w:20, h:50, cx:26, cy:62,
+        x:20, y:42, w:19, h:26,
         type:"action+fala",
         actionIds:["mostrar_helder","avisar_ferias"],
         falas:[
@@ -211,13 +211,13 @@ const SCENES = {
       },
       {
         id:"zona3", label:"Violão", emoji:"🎸",
-        x:43, y:42, w:13, h:45, cx:49, cy:65,
+        x:53, y:48, w:12, h:26,
         type:"action",
         actionIds:["tocar_violao"],
       },
       {
         id:"zona4", label:"Robô", emoji:"🤖",
-        x:67, y:42, w:8, h:30, cx:71, cy:56,
+        x:72, y:46, w:9, h:22,
         type:"fala",
         falas:[
           { text:"Instalou seus plugins BRP?", minDay:1 },
@@ -227,13 +227,13 @@ const SCENES = {
       },
       {
         id:"zona5", label:"Monitores", emoji:"💻",
-        x:75, y:30, w:22, h:55, cx:87, cy:57,
+        x:82, y:42, w:12, h:18,
         type:"action",
         actionIds:["fazer_vinheta","fazer_logo","buscar_ref","pegar_tarefa"],
       },
       {
         id:"zona6", label:"Tentáculo", emoji:"🐙",
-        x:75, y:0, w:22, h:32, cx:88, cy:14,
+        x:85, y:2, w:9, h:32,
         type:"fala",
         falas:[
           { text:"Humm, polvos sempre representam muito bem os criativos", minDay:1 },
@@ -242,7 +242,7 @@ const SCENES = {
       },
       {
         id:"zona7", label:"Garrafa d'água", emoji:"💧",
-        x:87, y:68, w:10, h:30, cx:92, cy:83,
+        x:91, y:68, w:6, h:26,
         type:"drink",
       },
     ],
@@ -264,7 +264,7 @@ const SCENES = {
     npcs:[],
     hotspots:[],
     clickZones:[
-      { id:"zona1", label:"Jess", emoji:"😄", x:5, y:28, w:16, h:60, cx:13, cy:62,
+      { id:"zona1", label:"Jess", emoji:"😄", x:7, y:36, w:14, h:47,
         type:"action+fala", actionIds:["meme_jess"],
         falas:[
           { text:"Você viu aquele vídeo do miau miau miau miau?", minDay:1 },
@@ -272,13 +272,13 @@ const SCENES = {
           { text:"Se achar o Xaropinho por aí me avisa!", minDay:3 },
         ],
       },
-      { id:"zona2", label:"Monitores", emoji:"💡", x:21, y:35, w:18, h:50, cx:30, cy:60,
+      { id:"zona2", label:"Monitores", emoji:"💡", x:22, y:43, w:17, h:25,
         type:"action", actionIds:["fazer_leds","fazer_ilustracao"],
       },
-      { id:"zona3", label:"Flipchart", emoji:"📋", x:39, y:28, w:10, h:52, cx:44, cy:54,
+      { id:"zona3", label:"Flipchart", emoji:"📋", x:40, y:35, w:8, h:25,
         type:"action", actionIds:["trocar_ideia","fazer_laboral"],
       },
-      { id:"zona4", label:"Kell", emoji:"✨", x:57, y:32, w:18, h:52, cx:66, cy:60,
+      { id:"zona4", label:"Kell", emoji:"✨", x:63, y:42, w:13, h:26,
         type:"action+fala", actionIds:["papo_kell"],
         falas:[
           { text:"Gente, que time incrível. Amo trabalhar aqui.", minDay:1 },
@@ -287,13 +287,13 @@ const SCENES = {
           { text:"E aí friend, como vai meu amigo, minha amiga?", minDay:1 },
         ],
       },
-      { id:"zona5", label:"Cafeteira", emoji:"☕", x:75, y:38, w:10, h:28, cx:80, cy:52,
+      { id:"zona5", label:"Cafeteira", emoji:"☕", x:85, y:44, w:6, h:14,
         type:"action", actionIds:["cafe_edit"],
       },
-      { id:"zona6", label:"Garrafa d'água", emoji:"💧", x:86, y:2, w:12, h:26, cx:92, cy:15,
+      { id:"zona6", label:"Garrafa d'água", emoji:"💧", x:94, y:2, w:6, h:30,
         type:"drink",
       },
-      { id:"zona7", label:"Urso de pelúcia", emoji:"🐻", x:82, y:55, w:16, h:43, cx:90, cy:77,
+      { id:"zona7", label:"Urso de pelúcia", emoji:"🐻", x:89, y:61, w:8, h:25,
         type:"fala",
         falas:[
           { text:"Oi sou o Bob, durmo enquanto eles trabalham...", minDay:1 },
@@ -548,29 +548,17 @@ const Intro = ({ onStart, musicOn, setMusicOn, volume, setVolume, audioRef }) =>
     <div style={{width:"100%",height:"100%",background:"linear-gradient(135deg,#060610,#0d0d20,#060610)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",padding:20,boxSizing:"border-box"}}>
       <div style={{maxWidth:520,width:"100%",textAlign:"center"}}>
  
-        {/* Logo home — ocupa toda a largura */}
+        {/* Logo home — 85% da largura */}
         <img
           src="https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908844/logo_home_gbqvwe.png"
           alt="Criação Visual — Sobreviva ao Expediente"
-          style={{width:"100%",maxWidth:520,marginBottom:10,display:"block",margin:"0 auto 10px"}}
+          style={{width:"85%",maxWidth:442,display:"block",margin:"0 auto 10px"}}
         />
  
         <p style={{color:"#666",fontSize:11.5,lineHeight:1.8,margin:"10px 0"}}>
           Mantenha <strong style={{color:"#5b8dee"}}>Criatividade</strong>, <strong style={{color:"#a855f7"}}>Socialização</strong>, <strong style={{color:"#22c55e"}}>Movimentação</strong> e <strong style={{color:"#38bdf8"}}>Hidratação</strong> acima do zero.<br/>
           <em style={{color:"#555"}}>Cuidado com os eventos críticos. E com o Calango. 🦎</em>
         </p>
- 
-        {/* Controle de áudio */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:10}}>
-          <button onClick={()=>setMusicOn(p=>!p)}
-            style={{background:"none",border:"1px solid #2a2a3a",borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:14,color:musicOn?"#e8c840":"#444",transition:"all .2s"}}>
-            {musicOn?"🔊":"🔇"}
-          </button>
-          <input type="range" min="0" max="1" step="0.05" value={volume}
-            onChange={e=>setVolume(Number(e.target.value))}
-            style={{width:100,accentColor:"#e8c840",cursor:"pointer",opacity:musicOn?1:0.4}}/>
-          <span style={{fontSize:9,color:"#444",letterSpacing:1}}>MÚSICA</span>
-        </div>
  
         <div style={{background:"#0d0d18",border:"1px solid #2a2a3a",borderRadius:10,padding:"14px 18px",margin:"12px 0",textAlign:"left"}}>
           <label style={{fontSize:9,color:"#e8c840",letterSpacing:2,display:"block",marginBottom:7,textTransform:"uppercase"}}>Seu nome ou apelido</label>
@@ -1363,27 +1351,7 @@ export default function SBTGame() {
                         <span style={{fontSize:18}}>⛔</span>
                       </div>
                     )}
-                    {/* Círculo indicador — aparece só no hover */}
-                    {!zoneDiaDisabled && (
-                      <div
-                        className={`zone-dot zone-dot-${zone.id}`}
-                        style={{
-                          position:"absolute",
-                          left:`${zone.cx ?? (zone.x + zone.w/2)}%`,
-                          top:`${zone.cy ?? (zone.y + zone.h/2)}%`,
-                          transform:"translate(-50%,-50%)",
-                          width:20, height:20,
-                          borderRadius:"50%",
-                          background:"#e8c840",
-                          opacity:0,
-                          boxShadow:"0 0 6px #e8c840aa",
-                          zIndex:14,
-                          pointerEvents:"none",
-                          transition:"opacity .15s",
-                        }}
-                      />
-                    )}
-                    {/* Área de clique invisível */}
+                    {/* Área de clique com highlight no hover */}
                     <div
                       onClick={handleZoneClick}
                       style={{
@@ -1391,17 +1359,13 @@ export default function SBTGame() {
                         left:`${zone.x}%`, top:`${zone.y}%`,
                         width:`${zone.w}%`, height:`${zone.h}%`,
                         cursor:"pointer",
-                        background:"transparent",
-                        zIndex:15,
+                        border:isOpen?"2px solid #e8c840":"2px solid transparent",
+                        borderRadius:6,
+                        background:isOpen?"rgba(232,200,64,.12)":"transparent",
+                        transition:"all .2s", zIndex:15,
                       }}
-                      onMouseEnter={()=>{
-                        const dot = document.querySelector(`.zone-dot-${zone.id}`);
-                        if(dot) dot.style.opacity = (zone.type==="famoso" && (!famosoAtual||famosoUsado)) ? "0" : "0.5";
-                      }}
-                      onMouseLeave={()=>{
-                        const dot = document.querySelector(`.zone-dot-${zone.id}`);
-                        if(dot) dot.style.opacity = "0";
-                      }}
+                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
+                      onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
                     {/* Menu de ações para zonas do tipo action / action+fala */}
                     {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia")&&!zoneDiaDisabled&&(()=>{
