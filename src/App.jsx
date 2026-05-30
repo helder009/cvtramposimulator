@@ -155,40 +155,12 @@ const SCENES = {
     npcs:[],
     hotspots:[],
     clickZones:[
-      {
-        id:"zona1", label:"Padoca", emoji:"☕",
-        x:0, y:22, w:18, h:68,
-        type:"action",
-        actionIds:["cafe_praca"],
-      },
-      {
-        id:"zona2", label:"Casa do Pão de Quê?", emoji:"🧆",
-        x:18, y:26, w:14, h:42,
-        type:"action+dia",  // indisponível a partir do dia 3
-        actionIds:["cafe_caro"],
-        maxDay:2,
-      },
-      {
-        id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎",
-        x:18, y:68, w:14, h:28,
-        type:"action",
-        actionIds:["ir_calango"],
-      },
-      {
-        id:"zona4", label:"Mesas", emoji:"🧘",
-        x:32, y:65, w:38, h:35,
-        type:"action",
-        actionIds:["almoco_rapido","mesa_quieta"],
-      },
-      {
-        id:"zona5", label:"Famoso", emoji:"📸",
-        x:70, y:28, w:18, h:62,
-        type:"famoso",
-        actionIds:["foto_famoso"],
-      },
-      {
-        id:"zona6", label:"TV — Silvio Santos", emoji:"📺",
-        x:70, y:20, w:10, h:12,
+      { id:"zona1", label:"Casa do Pão de Quê?", emoji:"☕", x:0, y:22, w:18, h:68, cx:9, cy:56, type:"action", actionIds:["cafe_praca"] },
+      { id:"zona2", label:"Suchi Colorido", emoji:"🧆", x:18, y:26, w:14, h:42, cx:25, cy:47, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
+      { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:18, y:68, w:14, h:28, cx:25, cy:82, type:"action", actionIds:["ir_calango"] },
+      { id:"zona4", label:"Mesas", emoji:"🧘", x:32, y:35, w:38, h:55, cx:51, cy:62, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
+      { id:"zona5", label:"Famoso", emoji:"📸", x:70, y:28, w:18, h:62, cx:79, cy:59, type:"famoso", actionIds:["foto_famoso"] },
+      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:70, y:10, w:18, h:22, cx:79, cy:21,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
@@ -200,7 +172,7 @@ const SCENES = {
     ],
     actions:[
       {id:"cafe_praca",    label:"Tomar um café",                      emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café da praça. Fraco mas quente. Funciona."},
-      {id:"cafe_caro",     label:"Tomar um café só que mais caro",               emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café especial. Caro. Mas admita: o copo era bonito."},
+      {id:"cafe_caro",     label:"Tomar um café (caro)",               emoji:"☕", time:1, effects:{criar:+5, mexer:0,   socializar:+5},  msg:"Café especial. Caro. Mas admita: o copo era bonito."},
       {id:"almoco_rapido", label:"Almoço rápido (cheio e barulhento)", emoji:"🍱", time:2, effects:{criar:0,  mexer:+20, socializar:+50}, availFrom:"11:30", availUntil:"15:30", msg:"Você almoçou com 200 pessoas gritando. A comida estava ok. Seus ouvidos, não."},
       {id:"mesa_quieta",   label:"Achar uma mesa pra sentar",          emoji:"🧘", time:4, effects:{criar:0,  mexer:+30, socializar:+30}, availFrom:"11:30", availUntil:"15:30", msg:"Você achou um cantinho tranquilo. Comeu devagar. Isso deveria ser mais comum."},
       {id:"foto_famoso",   label:"Tirar foto com famoso",              emoji:"📸", time:2, special:"foto_famoso", effects:{}, msg:""},
@@ -217,7 +189,7 @@ const SCENES = {
     clickZones:[
       {
         id:"zona1", label:"Mascote", emoji:"🟡",
-        x:0, y:37, w:17, h:55,
+        x:0, y:37, w:17, h:55, cx:8, cy:64,
         type:"fala",
         falas:[
           { text:"Vai lá Brasil!", minDay:1 },
@@ -227,7 +199,7 @@ const SCENES = {
       },
       {
         id:"zona2", label:"Hélder", emoji:"👨‍💼",
-        x:17, y:37, w:20, h:50,
+        x:17, y:37, w:20, h:50, cx:26, cy:62,
         type:"action+fala",
         actionIds:["mostrar_helder","avisar_ferias"],
         falas:[
@@ -239,13 +211,13 @@ const SCENES = {
       },
       {
         id:"zona3", label:"Violão", emoji:"🎸",
-        x:43, y:42, w:13, h:45,
+        x:43, y:42, w:13, h:45, cx:49, cy:65,
         type:"action",
         actionIds:["tocar_violao"],
       },
       {
         id:"zona4", label:"Robô", emoji:"🤖",
-        x:67, y:42, w:8, h:30,
+        x:67, y:42, w:8, h:30, cx:71, cy:56,
         type:"fala",
         falas:[
           { text:"Instalou seus plugins BRP?", minDay:1 },
@@ -255,13 +227,13 @@ const SCENES = {
       },
       {
         id:"zona5", label:"Monitores", emoji:"💻",
-        x:75, y:30, w:22, h:55,
+        x:75, y:30, w:22, h:55, cx:87, cy:57,
         type:"action",
         actionIds:["fazer_vinheta","fazer_logo","buscar_ref","pegar_tarefa"],
       },
       {
         id:"zona6", label:"Tentáculo", emoji:"🐙",
-        x:75, y:0, w:22, h:32,
+        x:75, y:0, w:22, h:32, cx:88, cy:14,
         type:"fala",
         falas:[
           { text:"Humm, polvos sempre representam muito bem os criativos", minDay:1 },
@@ -270,7 +242,7 @@ const SCENES = {
       },
       {
         id:"zona7", label:"Garrafa d'água", emoji:"💧",
-        x:87, y:68, w:10, h:30,
+        x:87, y:68, w:10, h:30, cx:92, cy:83,
         type:"drink",
       },
     ],
@@ -292,34 +264,22 @@ const SCENES = {
     npcs:[],
     hotspots:[],
     clickZones:[
-      {
-        id:"zona1", label:"Jess", emoji:"😄",
-        x:5, y:28, w:16, h:60,
-        type:"action+fala",
-        actionIds:["meme_jess"],
+      { id:"zona1", label:"Jess", emoji:"😄", x:5, y:28, w:16, h:60, cx:13, cy:62,
+        type:"action+fala", actionIds:["meme_jess"],
         falas:[
           { text:"Você viu aquele vídeo do miau miau miau miau?", minDay:1 },
           { text:"Quer fazer uma tour pelo meu feed?", minDay:1 },
           { text:"Se achar o Xaropinho por aí me avisa!", minDay:3 },
         ],
       },
-      {
-        id:"zona2", label:"Monitores", emoji:"💡",
-        x:21, y:35, w:18, h:50,
-        type:"action",
-        actionIds:["fazer_leds","fazer_ilustracao"],
+      { id:"zona2", label:"Monitores", emoji:"💡", x:21, y:35, w:18, h:50, cx:30, cy:60,
+        type:"action", actionIds:["fazer_leds","fazer_ilustracao"],
       },
-      {
-        id:"zona3", label:"Flipchart", emoji:"📋",
-        x:39, y:28, w:10, h:52,
-        type:"action",
-        actionIds:["trocar_ideia","fazer_laboral"],
+      { id:"zona3", label:"Flipchart", emoji:"📋", x:39, y:28, w:10, h:52, cx:44, cy:54,
+        type:"action", actionIds:["trocar_ideia","fazer_laboral"],
       },
-      {
-        id:"zona4", label:"Kell", emoji:"✨",
-        x:57, y:32, w:18, h:52,
-        type:"action+fala",
-        actionIds:["papo_kell"],
+      { id:"zona4", label:"Kell", emoji:"✨", x:57, y:32, w:18, h:52, cx:66, cy:60,
+        type:"action+fala", actionIds:["papo_kell"],
         falas:[
           { text:"Gente, que time incrível. Amo trabalhar aqui.", minDay:1 },
           { text:"Você tá arrasando hoje! Olha só essa arte.", minDay:1 },
@@ -327,20 +287,13 @@ const SCENES = {
           { text:"E aí friend, como vai meu amigo, minha amiga?", minDay:1 },
         ],
       },
-      {
-        id:"zona5", label:"Cafeteira", emoji:"☕",
-        x:75, y:38, w:15, h:22,
-        type:"action",
-        actionIds:["cafe_edit"],
+      { id:"zona5", label:"Cafeteira", emoji:"☕", x:75, y:38, w:10, h:28, cx:80, cy:52,
+        type:"action", actionIds:["cafe_edit"],
       },
-      {
-        id:"zona6", label:"Garrafa d'água", emoji:"💧",
-        x:86, y:2, w:12, h:26,
+      { id:"zona6", label:"Garrafa d'água", emoji:"💧", x:86, y:2, w:12, h:26, cx:92, cy:15,
         type:"drink",
       },
-      {
-        id:"zona7", label:"Urso de pelúcia", emoji:"🐻",
-        x:82, y:55, w:16, h:43,
+      { id:"zona7", label:"Urso de pelúcia", emoji:"🐻", x:82, y:55, w:16, h:43, cx:90, cy:77,
         type:"fala",
         falas:[
           { text:"Oi sou o Bob, durmo enquanto eles trabalham...", minDay:1 },
@@ -588,19 +541,36 @@ const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimi
 };
  
 // ── INTRO ─────────────────────────────────────────────────────────────────────
-const Intro = ({ onStart }) => {
+const Intro = ({ onStart, musicOn, setMusicOn, volume, setVolume, audioRef }) => {
   const [nome, setNome] = useState("");
   const [shift, setShift] = useState(null);
   return (
     <div style={{width:"100%",height:"100%",background:"linear-gradient(135deg,#060610,#0d0d20,#060610)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",padding:20,boxSizing:"border-box"}}>
       <div style={{maxWidth:520,width:"100%",textAlign:"center"}}>
-        <div style={{fontSize:52,marginBottom:6}}>📺</div>
-        <div style={{fontSize:10,letterSpacing:5,color:"#e8c840",marginBottom:4,textTransform:"uppercase"}}>SBT — Sistema Brasileiro de Televisão</div>
-        <h1 style={{fontSize:22,color:"#fff",margin:"8px 0 6px",lineHeight:1.3}}>Criação Visual:<br/><span style={{color:"#e8c840"}}>Sobreviva ao Expediente</span></h1>
+ 
+        {/* Logo home — ocupa toda a largura */}
+        <img
+          src="https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908844/logo_home_gbqvwe.png"
+          alt="Criação Visual — Sobreviva ao Expediente"
+          style={{width:"100%",maxWidth:520,marginBottom:10,display:"block",margin:"0 auto 10px"}}
+        />
+ 
         <p style={{color:"#666",fontSize:11.5,lineHeight:1.8,margin:"10px 0"}}>
           Mantenha <strong style={{color:"#5b8dee"}}>Criatividade</strong>, <strong style={{color:"#a855f7"}}>Socialização</strong>, <strong style={{color:"#22c55e"}}>Movimentação</strong> e <strong style={{color:"#38bdf8"}}>Hidratação</strong> acima do zero.<br/>
           <em style={{color:"#555"}}>Cuidado com os eventos críticos. E com o Calango. 🦎</em>
         </p>
+ 
+        {/* Controle de áudio */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:10}}>
+          <button onClick={()=>setMusicOn(p=>!p)}
+            style={{background:"none",border:"1px solid #2a2a3a",borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:14,color:musicOn?"#e8c840":"#444",transition:"all .2s"}}>
+            {musicOn?"🔊":"🔇"}
+          </button>
+          <input type="range" min="0" max="1" step="0.05" value={volume}
+            onChange={e=>setVolume(Number(e.target.value))}
+            style={{width:100,accentColor:"#e8c840",cursor:"pointer",opacity:musicOn?1:0.4}}/>
+          <span style={{fontSize:9,color:"#444",letterSpacing:1}}>MÚSICA</span>
+        </div>
  
         <div style={{background:"#0d0d18",border:"1px solid #2a2a3a",borderRadius:10,padding:"14px 18px",margin:"12px 0",textAlign:"left"}}>
           <label style={{fontSize:9,color:"#e8c840",letterSpacing:2,display:"block",marginBottom:7,textTransform:"uppercase"}}>Seu nome ou apelido</label>
@@ -632,11 +602,21 @@ const Intro = ({ onStart }) => {
           <div>🔒 Eventos críticos bloqueiam ações</div>
         </div>
  
-        <button onClick={()=>nome.trim()&&shift&&onStart(nome.trim(),shift)}
-          disabled={!nome.trim()||!shift}
-          style={{background:(nome.trim()&&shift)?"#e8c840":"#222",color:(nome.trim()&&shift)?"#000":"#555",border:"none",padding:"11px 34px",borderRadius:8,cursor:(nome.trim()&&shift)?"pointer":"not-allowed",fontSize:13,fontFamily:"monospace",fontWeight:"bold",letterSpacing:2,textTransform:"uppercase",transition:"all 0.2s"}}>
-          Bater o Ponto →
-        </button>
+        {/* Botões: Bater o Ponto + Ranking */}
+        <div style={{display:"flex",gap:8,alignItems:"center",justifyContent:"center"}}>
+          <button onClick={()=>nome.trim()&&shift&&onStart(nome.trim(),shift)}
+            disabled={!nome.trim()||!shift}
+            style={{flex:1,background:(nome.trim()&&shift)?"#e8c840":"#222",color:(nome.trim()&&shift)?"#000":"#555",border:"none",padding:"11px 20px",borderRadius:8,cursor:(nome.trim()&&shift)?"pointer":"not-allowed",fontSize:13,fontFamily:"monospace",fontWeight:"bold",letterSpacing:2,textTransform:"uppercase",transition:"all 0.2s"}}>
+            Bater o Ponto →
+          </button>
+          <button title="Ranking"
+            style={{background:"#0d0d18",border:"1px solid #2a2a3a",borderRadius:8,padding:"11px 14px",cursor:"pointer",fontSize:18,transition:"all .2s",color:"#e8c840"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#e8c840";e.currentTarget.style.background="#1a1a08";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a3a";e.currentTarget.style.background="#0d0d18";}}>
+            🏅
+          </button>
+        </div>
+ 
       </div>
     </div>
   );
@@ -1031,7 +1011,10 @@ export default function SBTGame() {
   };
  
   if(phase==="intro") return (
-    <div style={OUTER}><div style={INNER}><div style={W}><Intro onStart={handleStart}/></div></div></div>
+    <div style={OUTER}><div style={INNER}><div style={W}>
+      <audio ref={audioRef} src="https://res.cloudinary.com/dio7kf0tb/video/upload/v1777134013/Mofadinho_Salgado___Game_V4_ijxoys.mp3" loop preload="auto"/>
+      <Intro onStart={handleStart} musicOn={musicOn} setMusicOn={setMusicOn} volume={volume} setVolume={setVolume} audioRef={audioRef}/>
+    </div></div></div>
   );
  
   if(phase==="nextday"){
@@ -1213,10 +1196,13 @@ export default function SBTGame() {
         {/* ── HEADER ── */}
         <div style={{background:"#070710",borderBottom:"2px solid #1a1a2e",padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexShrink:0,height:44}}>
  
-          {/* Logo */}
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            <span style={{fontSize:20}}>📺</span>
-            <span style={{color:"#e8c840",fontSize:10,letterSpacing:2,textTransform:"uppercase",fontWeight:"bold"}}>SBT Criação Visual</span>
+          {/* Logo topo jogo */}
+          <div style={{display:"flex",alignItems:"center",flexShrink:0}}>
+            <img
+              src="https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908844/logo_top_covb4g.png"
+              alt="SBT Criação Visual"
+              style={{height:32,width:"auto",display:"block"}}
+            />
           </div>
  
           {/* Locks + Música */}
@@ -1377,6 +1363,27 @@ export default function SBTGame() {
                         <span style={{fontSize:18}}>⛔</span>
                       </div>
                     )}
+                    {/* Círculo indicador — aparece só no hover */}
+                    {!zoneDiaDisabled && (
+                      <div
+                        className={`zone-dot zone-dot-${zone.id}`}
+                        style={{
+                          position:"absolute",
+                          left:`${zone.cx ?? (zone.x + zone.w/2)}%`,
+                          top:`${zone.cy ?? (zone.y + zone.h/2)}%`,
+                          transform:"translate(-50%,-50%)",
+                          width:20, height:20,
+                          borderRadius:"50%",
+                          background:"#e8c840",
+                          opacity:0,
+                          boxShadow:"0 0 6px #e8c840aa",
+                          zIndex:14,
+                          pointerEvents:"none",
+                          transition:"opacity .15s",
+                        }}
+                      />
+                    )}
+                    {/* Área de clique invisível */}
                     <div
                       onClick={handleZoneClick}
                       style={{
@@ -1384,13 +1391,17 @@ export default function SBTGame() {
                         left:`${zone.x}%`, top:`${zone.y}%`,
                         width:`${zone.w}%`, height:`${zone.h}%`,
                         cursor:"pointer",
-                        border:isOpen?"2px solid #e8c840":"2px solid transparent",
-                        borderRadius:6,
-                        background:isOpen?"rgba(232,200,64,.12)":"transparent",
-                        transition:"all .2s", zIndex:15,
+                        background:"transparent",
+                        zIndex:15,
                       }}
-                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
-                      onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
+                      onMouseEnter={()=>{
+                        const dot = document.querySelector(`.zone-dot-${zone.id}`);
+                        if(dot) dot.style.opacity = (zone.type==="famoso" && (!famosoAtual||famosoUsado)) ? "0" : "0.5";
+                      }}
+                      onMouseLeave={()=>{
+                        const dot = document.querySelector(`.zone-dot-${zone.id}`);
+                        if(dot) dot.style.opacity = "0";
+                      }}
                     />
                     {/* Menu de ações para zonas do tipo action / action+fala */}
                     {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia")&&!zoneDiaDisabled&&(()=>{
@@ -1467,7 +1478,7 @@ export default function SBTGame() {
                     </div>
                   )
                   : (
-                    <div style={{textAlign:"center",color:"#2a2a3a",fontSize:11,fontFamily:"monospace",lineHeight:1.8,userSelect:"none"}}>
+                    <div style={{textAlign:"center",color:"#6a6a8a",fontSize:11,fontFamily:"monospace",lineHeight:1.8,userSelect:"none"}}>
                       🖱️ Clique nos objetos do cenário
                     </div>
                   )
