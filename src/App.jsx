@@ -173,19 +173,19 @@ const CRITICAL_EVENTS = {
 // ── FAMOSOS ───────────────────────────────────────────────────────────────────
 const FAMOSOS = [
   { id:"patricia", nome:"Patricia Abravanel", emoji:"👑", prob:0.25,
-    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908848/praca_patricia_1_yaid3s.jpg",
+    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328570/_fam_patricia_g3ium0.png",
     frase:"Nossa como você é bonito(a)!",
     effects:{criar:-40, mexer:0, socializar:+60} },
   { id:"xaropinho", nome:"Xaropinho", emoji:"🎤", prob:0.10,
-    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908849/praca_xaropinho_2_jtap0c.jpg",
+    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328569/_fam_xaropinho_cd1goz.png",
     frase:"Rapaaaaazzz",
     effects:{criar:0, mexer:0, socializar:+100} },
   { id:"celso", nome:"Celso Portiolli", emoji:"🎰", prob:0.25,
-    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908845/praca_celso_3_amdq2u.jpg",
+    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328569/_fam_celso_dyror9.png",
     frase:"É hora de arriscar!",
     effects:{criar:-40, mexer:0, socializar:+60} },
   { id:"liminha", nome:"Liminha", emoji:"🎸", prob:0.40,
-    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908846/praca_liminha_4_jk8yfp.jpg",
+    img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328569/_fam_liminha_vpk1vr.png",
     frase:"Você Sabia que o Agnaldo Timóteo foi motorista da Ângela Maria?",
     effects:{criar:-40, mexer:0, socializar:+40} },
 ];
@@ -221,7 +221,7 @@ const SCENES = {
       { id:"zona2", label:"Casa do Pão de Quê?", emoji:"🧆", x:19, y:35, w:12, h:25, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
       { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:16, y:70, w:12, h:14, type:"action", actionIds:["ir_calango"] },
       { id:"zona4", label:"Mesas", emoji:"🧘", x:39, y:52, w:33, h:26, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
-      { id:"zona5", label:"Famoso", emoji:"📸", x:75, y:45, w:12, h:40, type:"famoso", actionIds:["foto_famoso"] },
+      { id:"zona5", label:"Famoso", emoji:"📸", x:72.8, y:43.2, w:12.05, h:42.7, type:"famoso", actionIds:["foto_famoso"] },
       { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:73, y:26, w:9, h:14,
         type:"fala",
         falas:[
@@ -1621,7 +1621,7 @@ export default function SBTGame() {
  
                 return (
                   <div key={zone.id}>
-                    {/* Imagem do famoso sobreposta na zona */}
+                    {/* Imagem do famoso (PNG transparente) sobreposta na zona */}
                     {zone.type==="famoso" && famosoAtual && !famosoUsado && (
                       <img
                         src={famosoAtual.img}
@@ -1630,9 +1630,8 @@ export default function SBTGame() {
                           position:"absolute",
                           left:`${zone.x}%`, top:`${zone.y}%`,
                           width:`${zone.w}%`, height:`${zone.h}%`,
-                          objectFit:"cover", objectPosition:"top",
+                          objectFit:"contain", objectPosition:"bottom",
                           zIndex:12, pointerEvents:"none",
-                          borderRadius:4,
                         }}
                       />
                     )}
@@ -1671,7 +1670,8 @@ export default function SBTGame() {
                     {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave")&&!zoneDiaDisabled&&(()=>{
                       const zoneActions = cur.actions.filter(a=>
                         (zone.actionIds||[]).includes(a.id) &&
-                        !(a.availDay && (days+1) < a.availDay)  // oculta ações ainda não liberadas por dia
+                        !(a.availDay && (days+1) < a.availDay) &&            // oculta ações ainda não liberadas por dia
+                        !(a.special==="voltinha_pos" && !calangoPassed)      // oculta voltinha pós-calango até passar no teste
                       );
                       // Se action+fala: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
@@ -1727,7 +1727,7 @@ export default function SBTGame() {
  
             {/* ── PAINEL ABAIXO DA CENA (ID Visual) — falas e infos ── */}
             {isClickScene&&(
-              <div style={{background:"#080814",flex:1,display:"flex",alignItems:"center",justifyContent:"center",borderTop:"1px solid #0f0f1e",padding:"10px 20px"}}>
+              <div style={{background:"#080814",flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",borderTop:"1px solid #0f0f1e",padding:"10px 20px",gap:8}}>
                 {zonaMsg
                   ? (
                     <div style={{
@@ -1750,6 +1750,13 @@ export default function SBTGame() {
                     </div>
                   )
                 }
+                {/* BOTÃO DE TESTE — remover futuramente */}
+                {scene==="praca"&&(
+                  <button onClick={()=>{ setFamosoAtual(sortearFamoso()); setFamosoUsado(false); }}
+                    style={{background:"#7a1fa2",color:"#fff",border:"1px solid #a855f7",borderRadius:6,padding:"5px 14px",fontSize:10,fontFamily:"monospace",cursor:"pointer",letterSpacing:1}}>
+                    🧪 MOSTRAR FAMOSO
+                  </button>
+                )}
               </div>
             )}
           </div>
