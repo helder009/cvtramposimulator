@@ -1757,13 +1757,6 @@ export default function SBTGame() {
                     </div>
                   )
                 }
-                {/* BOTÃO DE TESTE — remover futuramente */}
-                {scene==="praca"&&(
-                  <button onClick={()=>{ setFamosoAtual(sortearFamoso()); setFamosoUsado(false); }}
-                    style={{background:"#7a1fa2",color:"#fff",border:"1px solid #a855f7",borderRadius:6,padding:"5px 14px",fontSize:10,fontFamily:"monospace",cursor:"pointer",letterSpacing:1}}>
-                    🧪 MOSTRAR FAMOSO
-                  </button>
-                )}
               </div>
             )}
           </div>
