@@ -175,19 +175,19 @@ const FAMOSOS = [
   { id:"patricia", nome:"Patricia Abravanel", emoji:"👑", prob:0.25,
     img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328570/_fam_patricia_g3ium0.png",
     frase:"Nossa como você é bonito(a)!",
-    effects:{criar:-40, mexer:0, socializar:+60} },
+    effects:{criar:-30, mexer:0, socializar:+60} },
   { id:"xaropinho", nome:"Xaropinho", emoji:"🎤", prob:0.10,
     img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328569/_fam_xaropinho_cd1goz.png",
     frase:"Rapaaaaazzz",
-    effects:{criar:0, mexer:0, socializar:+100} },
+    effects:{criar:+100, mexer:0, socializar:+100} },
   { id:"celso", nome:"Celso Portiolli", emoji:"🎰", prob:0.25,
     img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328569/_fam_celso_dyror9.png",
     frase:"É hora de arriscar!",
-    effects:{criar:-40, mexer:0, socializar:+60} },
+    effects:{criar:-30, mexer:0, socializar:+60} },
   { id:"liminha", nome:"Liminha", emoji:"🎸", prob:0.40,
     img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780328569/_fam_liminha_vpk1vr.png",
     frase:"Você Sabia que o Agnaldo Timóteo foi motorista da Ângela Maria?",
-    effects:{criar:-40, mexer:0, socializar:+40} },
+    effects:{criar:-30, mexer:0, socializar:+40} },
 ];
  
 // Sorteia um famoso ponderado pelas probabilidades
@@ -891,7 +891,7 @@ export default function SBTGame() {
   useEffect(()=>{
     if(phase!=="game") return;
     const currentDay = days + 1;
-    if(currentDay >= 2 && Math.random() < 0.20){
+    if(currentDay >= 2 && Math.random() < 0.25){
       setFamosoAtual(sortearFamoso());
     } else {
       setFamosoAtual(null);
