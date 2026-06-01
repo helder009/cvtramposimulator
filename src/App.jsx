@@ -492,7 +492,7 @@ const SCENES = {
           { text:"Que legal", minDay:3 },
         ],
       },
-      { id:"zona2", label:"Coco Mágico", emoji:"🥥", x:6, y:68, w:9, h:17, type:"action+fala", actionIds:["agua_coco"],
+      { id:"zona2", label:"Coco Mágico", emoji:"🥥", x:5.5, y:70.1, w:8.6, h:16.8, type:"action+fala", actionIds:["agua_coco"],
         falas:[
           { text:"Oooooi eu sou o Coco Mágico, sou rico em águas!", minDay:1 },
           { text:"HIDRATASSAAAUMMM", minDay:1 },
@@ -501,13 +501,13 @@ const SCENES = {
         ],
       },
       { id:"zona3", label:"Mesa de produção", emoji:"🎞️", x:22, y:49, w:20, h:23, type:"action", actionIds:["pacote_grafico"] },
-      { id:"zona4", label:"Gui", emoji:"☕", x:46, y:36, w:7, h:30, type:"action+fala", actionIds:["cafe_gui"],
+      { id:"zona4", label:"Gui", emoji:"☕", x:45.1, y:35.6, w:6.8, h:32, type:"action+fala", actionIds:["cafe_gui"],
         falas:[
           { text:"Bora tomar um café?", minDay:1 },
           { text:"Não me oferece um cigarro não, por favor.", minDay:3 },
         ],
       },
-      { id:"zona5", label:"Ilha de edição", emoji:"🫣", x:73, y:52, w:16, h:20, type:"action", actionIds:["censurar_crime"] },
+      { id:"zona5", label:"Ilha de edição", emoji:"🫣", x:71.8, y:46.6, w:15.4, h:22.7, type:"action", actionIds:["censurar_crime"] },
       { id:"zona6", label:"Estante", emoji:"📚", x:71, y:32, w:21, h:15, type:"fala+chave",
         falas:[
           { text:"Alguém escondeu uns bonequinhos raros nos nichos.", minDay:1 },
@@ -516,7 +516,7 @@ const SCENES = {
         ],
         actionIds:["chave_secreta"],
       },
-      { id:"zona7", label:"Computador", emoji:"📧", x:91, y:52, w:8, h:20, type:"action", actionIds:["checar_email"] },
+      { id:"zona7", label:"Computador", emoji:"📧", x:88.8, y:53.9, w:10.4, h:21, type:"action", actionIds:["checar_email"] },
     ],
     actions:[
       {id:"pacote_grafico", label:"Fazer Pacote Gráfico Especial",  emoji:"🎞️", time:16, effects:{criar:+50,mexer:-50,socializar:+10}, msg:"4 horas produzindo o pacote. Grandioso. Vale o sofrimento."},
