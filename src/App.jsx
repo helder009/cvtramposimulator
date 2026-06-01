@@ -100,8 +100,11 @@ const ACTION_LIMITS = {
   cochilo:2,
   comer_calango:2,
   voltinha_calango:2,
+  esquentar_marmita:1,
   // Jornalismo
-  pacote_grafico:1, censurar_crime:4, checar_email:4, cafe_gui:2, agua_coco:1,
+  pacote_grafico:1, censurar_crime:4, checar_email:4, cafe_gui:2, agua_coco:1, chave_secreta:1,
+  // CVT
+  cvt_figurino:2, cvt_cenario:2, cvt_fofoca:2,
 };
  
 // Categorias para bloqueio global por eventos críticos
@@ -116,9 +119,11 @@ const ACTION_CAT = {
   cafe_praca:"socializar", cafe_caro:"socializar", almoco_rapido:null, mesa_quieta:"mexer", foto_famoso:"socializar", ir_calango:"mexer",
   comer_calango:null, voltar_praca:"mexer", voltinha_calango:"mexer",
   voltinha:"mexer", sentar_mureta:"socializar", fumar:"mexer",
+  esquentar_marmita:"socializar",
   // Jornalismo
   pacote_grafico:"criar", censurar_crime:"criar", checar_email:"criar",
-  cafe_gui:"socializar", agua_coco:null,
+  cafe_gui:"socializar", agua_coco:null, chave_secreta:null,
+  cvt_figurino:"criar", cvt_cenario:"criar", cvt_fofoca:"socializar",
 };
  
 // ── NPCs ──────────────────────────────────────────────────────────────────────
@@ -200,7 +205,7 @@ function sortearFamoso() {
 const SCENE_NAV_LABELS = {
   praca:"Praça", identidade:"Id. Visual", editoria:"Editoria",
   corredor:"Corredor", banheiro:"Banheiro", calango:"Calango",
-  externo:"Área Externa", jornalismo:"Jornalismo"
+  externo:"Área Externa", jornalismo:"Jornalismo", cvt:"CVT"
 };
 const SCENE_ORDER_BASE = ["praca","identidade","editoria","corredor","banheiro","calango","externo"];
 const SCENE_ORDER_DAY2 = ["praca","identidade","editoria","corredor","banheiro","calango","externo","jornalismo"];
@@ -372,26 +377,42 @@ const SCENES = {
   },
   corredor:{
     id:"corredor", name:"Corredor", emoji:"🚶",
-    bg:"linear-gradient(160deg,#111,#1c1c1c)",
-    npcs:[],
-    hotspots:[
-      {id:"escada",   label:"Escada",    emoji:"🪜", x:22, y:48, desc:"Dois lances. Já conta como academia."},
-      {id:"beb",      label:"Bebedouro", emoji:"🚿", x:78, y:55, desc:"Água gelada. De graça!"},
-      {id:"janela_c", label:"Janela",    emoji:"🪟", x:52, y:35, desc:"Vista do mundão. Contemplar é pesquisa."},
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908851/corredor_base_mw0p5c.jpg",
+    npcs:[], hotspots:[],
+    clickZones:[
+      { id:"zona1", label:"Escada", emoji:"🪜", x:11, y:46, w:13, h:38, type:"action", actionIds:["subir_escada"] },
+      { id:"zona2", label:"Porta do Banheiro", emoji:"🚻", x:36, y:42, w:19, h:24, type:"action", actionIds:["ir_banheiro"] },
+      { id:"zona3", label:"Corredor", emoji:"🌃", x:50, y:64, w:6, h:15, type:"fala",
+        falas:[
+          { text:"Esse corredor de noite dá um pouco de medo.", minDay:1 },
+          { text:"Muito fácil se perder nesse labirinto.", minDay:1 },
+          { text:"O Media Center fica por ali.", minDay:1 },
+          { text:"Qual a direção da saída de emergência?", minDay:1 },
+        ],
+      },
+      { id:"zona4", label:"Bebedouro", emoji:"🚰", x:80, y:42, w:9, h:20, type:"action", actionIds:["encher_garr"] },
+      { id:"zona5", label:"Janela", emoji:"🪟", x:86, y:20, w:13, h:20, type:"action", actionIds:["janela_cor"] },
     ],
     actions:[
       {id:"subir_escada", label:"Subir/descer escada",        emoji:"🪜", time:1, effects:{criar:-20,mexer:+40,socializar:0},           msg:"Ufa! Dois lances. Pode colocar no currículo: 'pratica atividade física'."},
+      {id:"ir_banheiro",  label:"Ir ao banheiro",             emoji:"🚻", time:0, effects:{}, navigate:"banheiro", msg:"Você foi ao banheiro."},
       {id:"encher_garr",  label:"Encher a garrafinha d'água", emoji:"🚿", time:1, special:"encher", effects:{criar:-20,mexer:+30,socializar:+30}, msg:"Garrafinha cheia. Você é responsável e consciente. Por hoje."},
       {id:"janela_cor",   label:"Olhar pela janela",          emoji:"🪟", time:2, effects:{criar:+2, mexer:+20,socializar:0},           msg:"Cinco minutos fitando o horizonte. Isso é pesquisa de referência visual."},
     ]
   },
   banheiro:{
     id:"banheiro", name:"Banheiro", emoji:"🚻",
-    bg:"linear-gradient(160deg,#0e1a0e,#162616)",
-    npcs:[],
-    hotspots:[
-      {id:"pia",     label:"Pia",     emoji:"🚿", x:28, y:52, desc:"Lavar o rosto ajuda na criatividade. Fonte: alguém inventou isso."},
-      {id:"espelho", label:"Espelho", emoji:"🪞", x:62, y:40, desc:"'Estou bem. Estou ótimo.' — você, todo dia."},
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908849/banheiro_base_ctvipp.jpg",
+    npcs:[], hotspots:[],
+    clickZones:[
+      { id:"zona1", label:"Pia", emoji:"🚿", x:15, y:54, w:38, h:12, type:"action", actionIds:["lavar_rosto"] },
+      { id:"zona2", label:"Mensagem na parede", emoji:"✍️", x:41, y:31, w:9, h:15, type:"fala",
+        falas:[
+          { text:"Algum ex-funcionário deixou essa mensagem aqui...", minDay:1 },
+          { text:"Alô Virgíííniaaa", minDay:4 },
+        ],
+      },
+      { id:"zona3", label:"Cabine", emoji:"🚽", x:77, y:48, w:15, h:37, type:"action", actionIds:["pausa_estrategica","cochilo"] },
     ],
     actions:[
       {id:"lavar_rosto",       label:"Lavar o rosto",      emoji:"💦", time:1,       effects:{criar:-5, mexer:+5, socializar:-5},  msg:"Água fria no rosto. Reset mental ativado. Nova pessoa (por 10 minutos)."},
@@ -401,49 +422,125 @@ const SCENES = {
   },
   calango:{
     id:"calango", name:"Calango 🦎", emoji:"🦎",
-    bg:"linear-gradient(160deg,#0a1a00,#152800,#071000)",
-    npcs:["calango"],
-    hotspots:[
-      {id:"bandeja", label:"Bandeja",         emoji:"🍛", x:35, y:55, desc:"A bandeja do Calango. Abundante. Econômico. Corajoso."},
-      {id:"aviso",   label:"Aviso na parede", emoji:"⚠️", x:72, y:35, desc:"'Não nos responsabilizamos por desconfortos pós-refeição.'"},
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908850/calango_base_tsjpk2.jpg",
+    npcs:[], hotspots:[],
+    clickZones:[
+      { id:"zona1", label:"← Voltar pra Praça", emoji:"↩️", x:0, y:68, w:13, h:24, type:"action", actionIds:["voltar_praca"] },
+      { id:"zona2", label:"Bandeja", emoji:"🍛", x:19, y:55, w:40, h:16, type:"action", actionIds:["comer_calango"] },
+      { id:"zona3", label:"Atendente", emoji:"🦎", x:60, y:38, w:9, h:25, type:"fala",
+        falas:[
+          { text:"Se achar um pedaço de sacola no feijão não é culpa minha.", minDay:1 },
+          { text:"Já provou o strogonoff de salsicha?", minDay:1 },
+          { text:"Hoje tem festival de comida verde, em minha homenagem.", minDay:1 },
+        ],
+      },
+      { id:"zona4", label:"Micro-ondas", emoji:"🔥", x:77, y:55, w:21, h:16, type:"action", actionIds:["esquentar_marmita"] },
     ],
     actions:[
-      {id:"comer_calango", label:"Arriscar o Calango 🎲", emoji:"🦎", time:4, special:"calango_risk", effects:{}, availFrom:"11:30", msg:"Você encheu a bandeja com coragem..."},
-      {id:"voltar_praca",  label:"← Voltar pra Praça",    emoji:"↩️", time:0, effects:{}, navigate:"praca", msg:"Você reconsiderou. Sábio."},
+      {id:"comer_calango",     label:"Arriscar o Calango 🎲", emoji:"🦎", time:4, special:"calango_risk", effects:{}, availFrom:"11:30", msg:"Você encheu a bandeja com coragem..."},
+      {id:"esquentar_marmita", label:"Esquentar a Marmita",   emoji:"🔥", time:2, effects:{criar:-10,mexer:-10,socializar:+30}, msg:"Marmita esquentada. O cheiro tomou conta. Todos te olharam — com fome."},
+      {id:"voltar_praca",      label:"← Voltar pra Praça",    emoji:"↩️", time:0, effects:{}, navigate:"praca", msg:"Você reconsiderou. Sábio."},
     ]
   },
   externo:{
     id:"externo", name:"Área Externa", emoji:"🌳",
-    bg:"linear-gradient(160deg,#061a06,#0d2b0d,#040f04)",
-    npcs:[],
-    hotspots:[
-      {id:"calcadao", label:"Calçadão do SBT", emoji:"🛤️", x:40, y:50, desc:"Ar fresco, árvores, e a sensação de que o mundo existe."},
-      {id:"sol",      label:"Sol gostoso",      emoji:"☀️", x:72, y:30, desc:"Vitamina D gratuita. Aproveita."},
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908849/area-externa_base_n2cnki.jpg",
+    npcs:[], hotspots:[],
+    clickZones:[
+      { id:"zona1", label:"Calçadão / Mureta", emoji:"🛤️", x:9, y:24, w:18, h:57, type:"action", actionIds:["voltinha","sentar_mureta","voltinha_calango"] },
+      { id:"zona2", label:"Área de fumar", emoji:"🚬", x:37, y:31, w:13, h:42, type:"action+fala", actionIds:["fumar"],
+        falas:[
+          { text:"Fumar e respirar um pouco de ar puro. Equilíbrio é tudo.", minDay:1 },
+          { text:"Esses belos paisagismos sempre me inspiram.", minDay:1 },
+          { text:"Quem fuma, fuma a vida. Coma churros.", minDay:1 },
+          { text:"O jardineiro é Jesus, e as arvres somos nozes.", minDay:4 },
+        ],
+      },
+      { id:"zona3", label:"Segurança", emoji:"👮", x:57, y:40, w:8, h:20, type:"fala",
+        falas:[
+          { text:"É você que tá colocando comida pros gatos aqui?", minDay:1 },
+          { text:"Se eu pegar você passando o crachá pra outra pessoa, vai se ver comigo!", minDay:1 },
+          { text:"Não confie totalmente na rádio peão.", minDay:1 },
+          { text:"Se o Xaropinho aparecer na praça de alimentação, liga no meu ramal!", minDay:2 },
+        ],
+      },
+      { id:"zona4", label:"Van", emoji:"🚐", x:70, y:44, w:10, h:16, type:"fala",
+        falas:[
+          { text:"Xi, alguém perdeu a van...", minDay:1 },
+          { text:"Uma fofoca alheia na van é sempre bem-vinda.", minDay:1 },
+        ],
+      },
+      { id:"zona5", label:"Ir pro Calango 🦎", emoji:"🦎", x:83, y:20, w:9, h:75, type:"action", actionIds:["ir_calango"] },
     ],
     actions:[
       {id:"voltinha",         label:"Dar a voltinha",         emoji:"🛤️", time:2, effects:{criar:-10,mexer:+30,socializar:+10}, msg:"Sol, vento, silêncio. Você lembrou que existe um mundo fora do After Effects."},
       {id:"sentar_mureta",    label:"Sentar na mureta",       emoji:"🧘", time:2, effects:{criar:-20,mexer:+10,socializar:+30}, msg:"Sentado na mureta, vendo a vida passar. Socializou com três pessoas aleatórias."},
       {id:"fumar",            label:"Fumar um cigarrinho",    emoji:"🚬", time:2, special:"fumar", effects:{criar:+10,mexer:+30,socializar:+30}, msg:"Cigarrinho aceso. A hidratação agradece não. Valeu o bafo?"},
       {id:"voltinha_calango", label:"Voltinha pós-Calango 🦎",emoji:"🚶", time:2, special:"voltinha_pos", effects:{criar:0,mexer:+30,socializar:+10}, msg:"A famosa voltinha! Ar fresco fez milagre. Você se sentiu vivo de novo. 🦎✅"},
+      {id:"ir_calango",       label:"Ir pro Calango 🦎",      emoji:"🦎", time:0, effects:{}, navigate:"calango", msg:"Você segue em direção ao Calango. Coragem."},
     ]
   },
   jornalismo:{
     id:"jornalismo", name:"Jornalismo", emoji:"📡",
-    bg:"linear-gradient(160deg,#1a0a1a,#2a102a,#0f050f)",
-    npcs:[],
-    hotspots:[
-      {id:"redacao",  label:"Redação",        emoji:"🖥️", x:35, y:50, desc:"Monitores piscando, prazo apertado, adrenalina constante."},
-      {id:"tv",       label:"TV ao vivo",     emoji:"📺", x:70, y:38, desc:"A câmera nunca dorme. Você também não."},
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908844/jornalismo_base_bslb9u.jpg",
+    npcs:[], hotspots:[],
+    clickZones:[
+      { id:"zona1", label:"Redação", emoji:"🔥", x:2, y:38, w:17, h:17, type:"fala",
+        falas:[
+          { text:"Hmm, parece que a redação está pegando fogo", minDay:1 },
+          { text:"O fato como ele é!", minDay:1 },
+          { text:"Que legal", minDay:3 },
+        ],
+      },
+      { id:"zona2", label:"Coco Mágico", emoji:"🥥", x:6, y:68, w:9, h:17, type:"action+fala", actionIds:["agua_coco"],
+        falas:[
+          { text:"Oooooi eu sou o Coco Mágico, sou rico em águas!", minDay:1 },
+          { text:"HIDRATASSAAAUMMM", minDay:1 },
+          { text:"Beber água é mais importante do que viver.", minDay:1 },
+          { text:"Ai que delícia.", minDay:1 },
+        ],
+      },
+      { id:"zona3", label:"Mesa de produção", emoji:"🎞️", x:22, y:49, w:20, h:23, type:"action", actionIds:["pacote_grafico"] },
+      { id:"zona4", label:"Gui", emoji:"☕", x:46, y:36, w:7, h:30, type:"action+fala", actionIds:["cafe_gui"],
+        falas:[
+          { text:"Bora tomar um café?", minDay:1 },
+          { text:"Não me oferece um cigarro não, por favor.", minDay:3 },
+        ],
+      },
+      { id:"zona5", label:"Ilha de edição", emoji:"🫣", x:73, y:52, w:16, h:20, type:"action", actionIds:["censurar_crime"] },
+      { id:"zona6", label:"Estante", emoji:"📚", x:71, y:32, w:21, h:15, type:"fala+chave",
+        falas:[
+          { text:"Alguém escondeu uns bonequinhos raros nos nichos.", minDay:1 },
+          { text:"Uma bela decoração, algo me parece familiar.", minDay:1 },
+          { text:"Passagens secretas costumam ficar em estantes como essa.", minDay:3 },
+        ],
+        actionIds:["chave_secreta"],
+      },
+      { id:"zona7", label:"Computador", emoji:"📧", x:91, y:52, w:8, h:20, type:"action", actionIds:["checar_email"] },
     ],
     actions:[
-      {id:"pacote_grafico", label:"Pacote Gráfico Especial",  emoji:"🎞️", time:16, effects:{criar:+50,mexer:-50,socializar:+10}, msg:"4 horas produzindo o pacote. Grandioso. Vale o sofrimento."},
+      {id:"pacote_grafico", label:"Fazer Pacote Gráfico Especial",  emoji:"🎞️", time:16, effects:{criar:+50,mexer:-50,socializar:+10}, msg:"4 horas produzindo o pacote. Grandioso. Vale o sofrimento."},
       {id:"censurar_crime", label:"Censurar imagens de crime",emoji:"🫣",  time:2,  effects:{criar:+30,mexer:-30,socializar:0},  msg:"30 minutos desfocando coisas que você não queria ter visto."},
       {id:"checar_email",   label:"Checar o e-mail",          emoji:"📧",  time:1,  effects:{criar:+20,mexer:-10,socializar:+20}, msg:"15 minutos de e-mails. Metade spam. A outra metade também."},
       {id:"cafe_gui",       label:"Tomar café com o Gui",     emoji:"☕",  time:0,  effects:{criar:+10,mexer:-1, socializar:+40}, msg:"O Gui tem histórias incríveis. E um café ainda melhor."},
       {id:"agua_coco",      label:"Água de Coco Mágica 🥥",   emoji:"🥥",  time:0,  effects:{agua:+100},                         msg:"Uma água de coco apareceu do nada. Hidratação restaurada magicamente."},
+      {id:"chave_secreta",  label:"Pegar a Chave Secreta 🗝️", emoji:"🗝️", time:0, availDay:4, special:"chave_secreta", effects:{}, msg:"Você abriu uma porta que estava muito tempo trancada."},
+    ]
+  },
+  cvt:{
+    id:"cvt", name:"CVT — Novela", emoji:"📺",
+    bg:"linear-gradient(160deg,#1a1025,#2a1838,#0f0818)",
+    npcs:[], hotspots:[],
+    actions:[
+      {id:"cvt_figurino",  label:"Conferir figurinos",       emoji:"👗", time:2, effects:{criar:+20,mexer:-5, socializar:+10}, msg:"Você explorou o guarda-roupa da novela. Inspiração visual nas alturas."},
+      {id:"cvt_cenario",   label:"Visitar o cenário",        emoji:"🎬", time:2, effects:{criar:+30,mexer:+10,socializar:+5},  msg:"Andou pelo set da novela. Tudo é falso, mas parece tão real."},
+      {id:"cvt_fofoca",    label:"Fofocar com o elenco",     emoji:"🎭", time:2, effects:{criar:0,  mexer:0,  socializar:+50}, msg:"As fofocas dos bastidores valem ouro. Socialização nas alturas."},
     ]
   }
 };
+ 
+// Cenas que liberam beber água (têm garrafa)
+ 
  
 // ── COMPONENTES ───────────────────────────────────────────────────────────────
 const StatBar = ({ label, emoji, value, color, locked }) => {
@@ -522,10 +619,10 @@ const ChatLog = ({ log }) => {
       {[...log].reverse().map((l,i)=>(
         <div key={i} className="cbbl" style={{
           alignSelf:"flex-end",maxWidth:"96%",
-          background:l.type==="critical"?"#ffd6d6":l.type==="warn"?"#fff3cd":l.type==="water"?"#cce8ff":"#b8d8f8",
-          border:l.type==="critical"?"1px solid #ffaaaa":l.type==="warn"?"1px solid #ffc107":"1px solid #7cb9e8",
+          background:l.type==="critical"?"#ffd6d6":l.type==="warn"?"#fff3cd":l.type==="water"?"#cce8ff":l.type==="info"?"#d6ecff":"#b8d8f8",
+          border:l.type==="critical"?"1px solid #ffaaaa":l.type==="warn"?"1px solid #ffc107":l.type==="info"?"1px solid #38bdf8":"1px solid #7cb9e8",
           borderRadius:"14px 14px 4px 14px",padding:"7px 11px",fontSize:10.5,
-          color:l.type==="critical"?"#8b1a1a":l.type==="warn"?"#7a5500":"#1a3a5c",
+          color:l.type==="critical"?"#8b1a1a":l.type==="warn"?"#7a5500":l.type==="info"?"#075985":"#1a3a5c",
           lineHeight:1.5,fontFamily:"'Segoe UI',sans-serif",boxShadow:"0 1px 3px rgba(0,0,0,.1)"
         }}>{l.msg}</div>
       ))}
@@ -759,6 +856,7 @@ export default function SBTGame() {
   const [warned, setWarned]           = useState({});
   const [locks, setLocks]             = useState({});
   const [critModal, setCritModal]     = useState(null);
+  const [infoModal, setInfoModal]     = useState(null); // avisos informativos (azul)
   const [openZone, setOpenZone]       = useState(null);
   const [zonaMsg, setZonaMsg]         = useState(null); // {text, zona} — fala ou info exibida
   const [usageCounts, setUsageCounts] = useState({}); // {actionId: count}
@@ -773,6 +871,8 @@ export default function SBTGame() {
   const [rankingLoading, setRankingLoading] = useState(false);
   const [famosoAtual, setFamosoAtual] = useState(null);   // famoso disponível hoje na praça
   const [famosoUsado, setFamosoUsado] = useState(false);  // já tirou foto hoje
+  const [cvtUnlocked, setCvtUnlocked] = useState(false);  // chave secreta pegada → CVT no dia seguinte
+  const [cvtAvailable, setCvtAvailable] = useState(false); // CVT já acessível
   const audioRef                      = useRef(null);
  
   // Stats iniciais variam por dia
@@ -1013,6 +1113,16 @@ export default function SBTGame() {
       addLog(`[${lbl2}] 🥥 ${a.msg}`,"water"); return;
     }
  
+    // Chave Secreta — libera CVT no dia seguinte
+    if(a.special==="chave_secreta"){
+      if(cvtUnlocked||cvtAvailable) return;
+      setCvtUnlocked(true); incUsage(a.id);
+      const lblc=turnLabels[Math.min(turn,TOTAL_TURNS-1)];
+      addLog(`[${lblc}] 🗝️ ${a.msg}`,"info");
+      setOpenZone(null); setHotspot(null);
+      return;
+    }
+ 
     // Foto com famoso — usa o famoso sorteado no início do dia
     if(a.special==="foto_famoso"){
       if(!famosoAtual||famosoUsado) return;
@@ -1068,8 +1178,8 @@ export default function SBTGame() {
     setStats({criar:60,socializar:60,mexer:60});setAgua(70);setGarrafa(100);
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
-    setLocks({});setCritModal(null);setOpenZone(null);setUsageCounts({});
-    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);
+    setLocks({});setCritModal(null);setInfoModal(null);setOpenZone(null);setUsageCounts({});
+    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);
   };
  
   // Continua para o próximo dia sem resetar tudo
@@ -1085,6 +1195,26 @@ export default function SBTGame() {
     setUsedCriticals({}); setFamosoAtual(null); setFamosoUsado(false);
     setZonaMsg(null);
     setPhase("game");
+    // Aviso de novo ambiente ao entrar no Dia 2 (newDays===1)
+    if(newDays===1){
+      setInfoModal({
+        emoji:"📡",
+        title:"Novo ambiente disponível!",
+        msg:"O setor de Jornalismo agora está acessível pelo menu de navegação. Novas ações, novos perigos.",
+      });
+      addLog("📡 Novo ambiente disponível: Jornalismo!", "info");
+    }
+    // CVT liberado se a chave secreta foi pega no dia anterior
+    if(cvtUnlocked && !cvtAvailable){
+      setCvtAvailable(true);
+      setCvtUnlocked(false);
+      setInfoModal({
+        emoji:"📺",
+        title:"Novo ambiente disponível!",
+        msg:"O CVT (Novela) agora está acessível pelo menu de navegação. A chave secreta abriu caminho.",
+      });
+      addLog("📺 Novo ambiente disponível: CVT (Novela)!", "info");
+    }
   };
  
   const handleStart=(n,s)=>{
@@ -1096,6 +1226,7 @@ export default function SBTGame() {
     setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
     setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
     setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
+    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null);
     // Configura o novo jogo
     setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
     setPhase("game");
@@ -1269,7 +1400,10 @@ export default function SBTGame() {
  
   const cur = SCENES[scene];
   const canDrink = !!cur.canDrink;
-  const SCENE_ORDER = days >= 1 ? SCENE_ORDER_DAY2 : SCENE_ORDER_BASE;
+  const SCENE_ORDER = (() => {
+    const base = days >= 1 ? SCENE_ORDER_DAY2 : SCENE_ORDER_BASE;
+    return cvtAvailable ? [...base, "cvt"] : base;
+  })();
   const allActions = (cur.actions||[]).filter(a=>a.special!=="voltinha_pos"||(calangoPassed&&!isExhausted("voltinha_calango")));
   const lbl = turnLabels[Math.min(turn,TOTAL_TURNS-1)]||"--";
   const hasLocks = Object.values(locks).some(v=>v>0);
@@ -1306,6 +1440,19 @@ export default function SBTGame() {
               </>}
             </div>
             <button onClick={()=>setCritModal(null)} style={{background:"#ff4444",color:"#fff",border:"none",padding:"9px 26px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:"bold",letterSpacing:1}}>ENTENDIDO</button>
+          </div>
+        </div>
+      )}
+ 
+      {/* INFO MODAL (avisos — azul claro) */}
+      {infoModal&&(
+        <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.82)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,animation:"fadeIn .2s ease"}}>
+          <div style={{background:"linear-gradient(160deg,#0a2540,#0e3050)",border:"2px solid #38bdf8",borderRadius:14,padding:"28px 32px",maxWidth:400,textAlign:"center",boxShadow:"0 0 60px #38bdf855",animation:"popIn .25s ease"}}>
+            <div style={{fontSize:48,marginBottom:8}}>{infoModal.emoji}</div>
+            <div style={{fontSize:12,color:"#7dd3fc",fontWeight:"bold",marginBottom:6,letterSpacing:2,fontFamily:"monospace",textTransform:"uppercase"}}>Aviso</div>
+            <div style={{fontSize:15,color:"#e0f2fe",fontWeight:"bold",marginBottom:10,fontFamily:"monospace"}}>{infoModal.title}</div>
+            <div style={{fontSize:12,color:"#bae6fd",lineHeight:1.8,marginBottom:18,fontFamily:"sans-serif"}}>{infoModal.msg}</div>
+            <button onClick={()=>setInfoModal(null)} style={{background:"#38bdf8",color:"#04253d",border:"none",padding:"9px 26px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:"bold",letterSpacing:1}}>ENTENDIDO</button>
           </div>
         </div>
       )}
@@ -1443,6 +1590,23 @@ export default function SBTGame() {
                     setOpenZone(null);
                     return;
                   }
+                  // Zona fala+chave (Estante do Jornalismo): mostra fala; se a chave estiver
+                  // disponível (dia 4+ e ainda não pega), abre o menu da chave
+                  if(zone.type==="fala+chave"){
+                    const chaveAvail = (currentDay>=4) && !cvtUnlocked && !cvtAvailable;
+                    if(chaveAvail){
+                      if(isOpen){ setOpenZone(null); setZonaMsg(null); }
+                      else { setOpenZone(zone); setZonaMsg(null); }
+                    } else {
+                      const dispFalas = zone.falas.filter(f=>currentDay>=f.minDay);
+                      if(dispFalas.length>0){
+                        const f = dispFalas[Math.floor(Math.random()*dispFalas.length)];
+                        setZonaMsg({text:`${zone.emoji} "${f.text}"`, zona:zone.id});
+                      }
+                      setOpenZone(null);
+                    }
+                    return;
+                  }
                   // Zona de ação ou action+fala ou action+dia — toggle menu
                   if(zone.type==="action+dia" && zoneDiaDisabled){ setZonaMsg({text:"⛔ Fechado a partir do 3º dia.", zona:zone.id}); return; }
                   if(isOpen){ setOpenZone(null); setZonaMsg(null); }
@@ -1504,7 +1668,7 @@ export default function SBTGame() {
                       onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
                     {/* Menu de ações para zonas do tipo action / action+fala */}
-                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia")&&!zoneDiaDisabled&&(()=>{
+                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave")&&!zoneDiaDisabled&&(()=>{
                       const zoneActions = cur.actions.filter(a=>
                         (zone.actionIds||[]).includes(a.id) &&
                         !(a.availDay && (days+1) < a.availDay)  // oculta ações ainda não liberadas por dia
