@@ -222,7 +222,7 @@ const SCENES = {
       { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:16, y:70, w:12, h:14, type:"action", actionIds:["ir_calango"] },
       { id:"zona4", label:"Mesas", emoji:"🧘", x:39, y:52, w:33, h:26, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
       { id:"zona5", label:"Famoso", emoji:"📸", x:72.8, y:43.2, w:12.05, h:42.7, menuSide:"left", type:"famoso", actionIds:["foto_famoso"] },
-      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:71.5, y:26.2, w:9, h:14,
+      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:71.5, y:26.2, w:9, h:11.5,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
@@ -279,7 +279,7 @@ const SCENES = {
       },
       {
         id:"zona4", label:"Robô", emoji:"🤖",
-        x:71.5, y:46.3, w:9, h:22,
+        x:71.5, y:46.3, w:6.4, h:14,
         type:"fala",
         falas:[
           { text:"Instalou seus plugins BRP?", minDay:1 },
@@ -289,7 +289,7 @@ const SCENES = {
       },
       {
         id:"zona5", label:"Monitores", emoji:"💻",
-        x:82, y:42, w:12, h:18,
+        x:79.2, y:45.1, w:20.8, h:17.6,
         type:"action",
         actionIds:["fazer_vinheta","fazer_logo","buscar_ref","pegar_tarefa"],
       },
@@ -380,9 +380,9 @@ const SCENES = {
     bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908851/corredor_base_mw0p5c.jpg",
     npcs:[], hotspots:[],
     clickZones:[
-      { id:"zona1", label:"Escada", emoji:"🪜", x:11, y:46, w:13, h:38, type:"action", actionIds:["subir_escada"] },
-      { id:"zona2", label:"Porta do Banheiro", emoji:"🚻", x:36, y:42, w:19, h:24, type:"action", actionIds:["ir_banheiro"] },
-      { id:"zona3", label:"Corredor", emoji:"🌃", x:50, y:64, w:6, h:15, type:"fala",
+      { id:"zona1", label:"Escada", emoji:"🪜", x:8.3, y:24.4, w:17.9, h:58.5, type:"action", actionIds:["subir_escada"] },
+      { id:"zona2", label:"Porta do Banheiro", emoji:"🚻", x:35.9, y:31.3, w:13.3, h:40.2, type:"action", actionIds:["ir_banheiro"] },
+      { id:"zona3", label:"Corredor", emoji:"🌃", x:55.7, y:39.5, w:7.2, h:17.3, type:"fala",
         falas:[
           { text:"Esse corredor de noite dá um pouco de medo.", minDay:1 },
           { text:"Muito fácil se perder nesse labirinto.", minDay:1 },
@@ -390,8 +390,8 @@ const SCENES = {
           { text:"Qual a direção da saída de emergência?", minDay:1 },
         ],
       },
-      { id:"zona4", label:"Bebedouro", emoji:"🚰", x:80, y:42, w:9, h:20, type:"action", actionIds:["encher_garr"] },
-      { id:"zona5", label:"Janela", emoji:"🪟", x:86, y:20, w:13, h:20, type:"action", actionIds:["janela_cor"] },
+      { id:"zona4", label:"Bebedouro", emoji:"🚰", x:67.9, y:43.7, w:10.1, h:17.1, type:"action", actionIds:["encher_garr"] },
+      { id:"zona5", label:"Janela", emoji:"🪟", x:80.1, y:26.8, w:11.5, h:65.9, type:"action", actionIds:["janela_cor"] },
     ],
     actions:[
       {id:"subir_escada", label:"Subir/descer escada",        emoji:"🪜", time:1, effects:{criar:-20,mexer:+40,socializar:0},           msg:"Ufa! Dois lances. Pode colocar no currículo: 'pratica atividade física'."},
@@ -406,13 +406,13 @@ const SCENES = {
     npcs:[], hotspots:[],
     clickZones:[
       { id:"zona1", label:"Pia", emoji:"🚿", x:15, y:54, w:38, h:12, type:"action", actionIds:["lavar_rosto"] },
-      { id:"zona2", label:"Mensagem na parede", emoji:"✍️", x:41, y:31, w:9, h:15, type:"fala",
+      { id:"zona2", label:"Mensagem na parede", emoji:"✍️", x:39.9, y:30.7, w:7.8, h:14.4, type:"fala",
         falas:[
           { text:"Algum ex-funcionário deixou essa mensagem aqui...", minDay:1 },
           { text:"Alô Virgíííniaaa", minDay:4 },
         ],
       },
-      { id:"zona3", label:"Cabine", emoji:"🚽", x:77, y:48, w:15, h:37, type:"action", actionIds:["pausa_estrategica","cochilo"] },
+      { id:"zona3", label:"Cabine", emoji:"🚽", x:74.7, y:47.7, w:14.9, h:37.2, type:"action", actionIds:["pausa_estrategica","cochilo"] },
     ],
     actions:[
       {id:"lavar_rosto",       label:"Lavar o rosto",      emoji:"💦", time:1,       effects:{criar:-5, mexer:+5, socializar:-5},  msg:"Água fria no rosto. Reset mental ativado. Nova pessoa (por 10 minutos)."},
@@ -425,7 +425,7 @@ const SCENES = {
     bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908850/calango_base_tsjpk2.jpg",
     npcs:[], hotspots:[],
     clickZones:[
-      { id:"zona1", label:"← Voltar pra Praça", emoji:"↩️", x:0, y:68, w:13, h:24, type:"action", actionIds:["voltar_praca"] },
+      { id:"zona1", label:"← Voltar pra Praça", emoji:"↩️", x:6.3, y:67.1, w:12.4, h:30.5, type:"action", actionIds:["voltar_praca"] },
       { id:"zona2", label:"Bandeja", emoji:"🍛", x:19, y:55, w:40, h:16, type:"action", actionIds:["comer_calango"] },
       { id:"zona3", label:"Atendente", emoji:"🦎", x:60, y:38, w:9, h:25, type:"fala",
         falas:[
@@ -447,8 +447,8 @@ const SCENES = {
     bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908849/area-externa_base_n2cnki.jpg",
     npcs:[], hotspots:[],
     clickZones:[
-      { id:"zona1", label:"Calçadão / Mureta", emoji:"🛤️", x:9, y:24, w:18, h:57, type:"action", actionIds:["voltinha","sentar_mureta","voltinha_calango"] },
-      { id:"zona2", label:"Área de fumar", emoji:"🚬", x:37, y:31, w:13, h:42, type:"action+fala", actionIds:["fumar"],
+      { id:"zona1", label:"Calçadão / Mureta", emoji:"🛤️", x:10.6, y:45.4, w:12.4, h:36.6, type:"action", actionIds:["voltinha","sentar_mureta","voltinha_calango"] },
+      { id:"zona2", label:"Área de fumar", emoji:"🚬", x:35.5, y:40.9, w:17.9, h:21.7, type:"action+fala", actionIds:["fumar"],
         falas:[
           { text:"Fumar e respirar um pouco de ar puro. Equilíbrio é tudo.", minDay:1 },
           { text:"Esses belos paisagismos sempre me inspiram.", minDay:1 },
@@ -456,7 +456,7 @@ const SCENES = {
           { text:"O jardineiro é Jesus, e as arvres somos nozes.", minDay:4 },
         ],
       },
-      { id:"zona3", label:"Segurança", emoji:"👮", x:57, y:40, w:8, h:20, type:"fala",
+      { id:"zona3", label:"Segurança", emoji:"👮", x:47.9, y:66.1, w:5.8, h:14.6, type:"fala",
         falas:[
           { text:"É você que tá colocando comida pros gatos aqui?", minDay:1 },
           { text:"Se eu pegar você passando o crachá pra outra pessoa, vai se ver comigo!", minDay:1 },
@@ -464,13 +464,13 @@ const SCENES = {
           { text:"Se o Xaropinho aparecer na praça de alimentação, liga no meu ramal!", minDay:2 },
         ],
       },
-      { id:"zona4", label:"Van", emoji:"🚐", x:70, y:44, w:10, h:16, type:"fala",
+      { id:"zona4", label:"Van", emoji:"🚐", x:77.3, y:65.1, w:10.1, h:12.2, type:"fala",
         falas:[
           { text:"Xi, alguém perdeu a van...", minDay:1 },
           { text:"Uma fofoca alheia na van é sempre bem-vinda.", minDay:1 },
         ],
       },
-      { id:"zona5", label:"Ir pro Calango 🦎", emoji:"🦎", x:83, y:20, w:9, h:75, type:"action", actionIds:["ir_calango"] },
+      { id:"zona5", label:"Ir pro Calango 🦎", emoji:"🦎", x:83.7, y:20.7, w:16.3, h:22, type:"action", actionIds:["ir_calango"] },
     ],
     actions:[
       {id:"voltinha",         label:"Dar a voltinha",         emoji:"🛤️", time:2, effects:{criar:-10,mexer:+30,socializar:+10}, msg:"Sol, vento, silêncio. Você lembrou que existe um mundo fora do After Effects."},
