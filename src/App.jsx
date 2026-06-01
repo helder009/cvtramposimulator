@@ -221,7 +221,7 @@ const SCENES = {
       { id:"zona2", label:"Casa do Pão de Quê?", emoji:"🧆", x:19, y:35, w:12, h:25, type:"action+dia", actionIds:["cafe_caro"], maxDay:2 },
       { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:16, y:70, w:12, h:14, type:"action", actionIds:["ir_calango"] },
       { id:"zona4", label:"Mesas", emoji:"🧘", x:39, y:52, w:33, h:26, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
-      { id:"zona5", label:"Famoso", emoji:"📸", x:72.8, y:43.2, w:12.05, h:42.7, type:"famoso", actionIds:["foto_famoso"] },
+      { id:"zona5", label:"Famoso", emoji:"📸", x:72.8, y:43.2, w:12.05, h:42.7, menuSide:"left", type:"famoso", actionIds:["foto_famoso"] },
       { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:73, y:26, w:9, h:14,
         type:"fala",
         falas:[
@@ -972,10 +972,8 @@ export default function SBTGame() {
   };
  
   const isExhausted = (id) => {
-    // Foto com famoso: indisponível no dia 1, ou se famoso não apareceu, ou já usado
+    // Foto com famoso: disponível sempre que houver um famoso na praça e ainda não usado
     if(id==="foto_famoso"){
-      const currentDay = days + 1;
-      if(currentDay < 2) return true;
       if(!famosoAtual || famosoUsado) return true;
       return false;
     }
@@ -1577,7 +1575,8 @@ export default function SBTGame() {
                   // Zona de famoso — só ativa se há famoso disponível
                   if(zone.type==="famoso"){
                     if(!famosoAtual||famosoUsado) return;
-                    doAction(cur.actions.find(a=>a.id==="foto_famoso"));
+                    if(isOpen){ setOpenZone(null); setZonaMsg(null); }
+                    else { setOpenZone(zone); setZonaMsg(null); }
                     return;
                   }
                   // Zona só de falas
@@ -1666,13 +1665,21 @@ export default function SBTGame() {
                       onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
                       onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
-                    {/* Menu de ações para zonas do tipo action / action+fala */}
-                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave")&&!zoneDiaDisabled&&(()=>{
-                      const zoneActions = cur.actions.filter(a=>
+                    {/* Menu de ações para zonas do tipo action / action+fala / famoso */}
+                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso")&&!zoneDiaDisabled&&(()=>{
+                      let zoneActions = cur.actions.filter(a=>
                         (zone.actionIds||[]).includes(a.id) &&
                         !(a.availDay && (days+1) < a.availDay) &&            // oculta ações ainda não liberadas por dia
                         !(a.special==="voltinha_pos" && !calangoPassed)      // oculta voltinha pós-calango até passar no teste
                       );
+                      // Zona de famoso: label dinâmico com o nome do famoso atual
+                      if(zone.type==="famoso" && famosoAtual){
+                        zoneActions = zoneActions.map(a=>
+                          a.id==="foto_famoso"
+                            ? {...a, label:`Tirar foto com ${famosoAtual.nome}`, emoji:famosoAtual.emoji}
+                            : a
+                        );
+                      }
                       // Se action+fala: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
                         if(zone.type==="action+fala"&&zone.falas){
