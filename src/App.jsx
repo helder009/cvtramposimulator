@@ -222,7 +222,7 @@ const SCENES = {
       { id:"zona3", label:"Ir pro Calango 🦎", emoji:"🦎", x:16, y:70, w:12, h:14, type:"action", actionIds:["ir_calango"] },
       { id:"zona4", label:"Mesas", emoji:"🧘", x:39, y:52, w:33, h:26, type:"action", actionIds:["almoco_rapido","mesa_quieta"] },
       { id:"zona5", label:"Famoso", emoji:"📸", x:72.8, y:43.2, w:12.05, h:42.7, menuSide:"left", type:"famoso", actionIds:["foto_famoso"] },
-      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:73, y:26, w:9, h:14,
+      { id:"zona6", label:"TV — Silvio Santos", emoji:"📺", x:71.5, y:26.2, w:9, h:14,
         type:"fala",
         falas:[
           { text:"Do mundo não se leva nada. Vamos sorrir e cantar!", minDay:1 },
@@ -279,7 +279,7 @@ const SCENES = {
       },
       {
         id:"zona4", label:"Robô", emoji:"🤖",
-        x:72, y:46, w:9, h:22,
+        x:71.5, y:46.3, w:9, h:22,
         type:"fala",
         falas:[
           { text:"Instalou seus plugins BRP?", minDay:1 },
@@ -295,7 +295,7 @@ const SCENES = {
       },
       {
         id:"zona6", label:"Tentáculo", emoji:"🐙",
-        x:85, y:2, w:9, h:32,
+        x:82.7, y:3, w:9, h:32,
         type:"fala",
         falas:[
           { text:"Humm, polvos sempre representam muito bem os criativos", minDay:1 },
@@ -304,7 +304,7 @@ const SCENES = {
       },
       {
         id:"zona7", label:"Garrafa d'água", emoji:"💧",
-        x:91, y:68, w:6, h:26,
+        x:90.8, y:70.5, w:6, h:26,
         type:"drink",
       },
     ],
@@ -349,10 +349,10 @@ const SCENES = {
           { text:"E aí friend, como vai meu amigo, minha amiga?", minDay:1 },
         ],
       },
-      { id:"zona5", label:"Cafeteira", emoji:"☕", x:85, y:44, w:6, h:14,
+      { id:"zona5", label:"Cafeteira", emoji:"☕", x:82.4, y:43, w:6, h:14,
         type:"action", actionIds:["cafe_edit"],
       },
-      { id:"zona6", label:"Garrafa d'água", emoji:"💧", x:94, y:2, w:6, h:30,
+      { id:"zona6", label:"Garrafa d'água", emoji:"💧", x:90.8, y:3.2, w:6, h:30,
         type:"drink",
       },
       { id:"zona7", label:"Urso de pelúcia", emoji:"🐻", x:89, y:61, w:8, h:25,
@@ -1649,7 +1649,7 @@ export default function SBTGame() {
                         <span style={{fontSize:18}}>⛔</span>
                       </div>
                     )}
-                    {/* Área de clique com highlight no hover */}
+                    {/* Área de clique — highlight no hover (exceto zonas de beber água) */}
                     <div
                       onClick={handleZoneClick}
                       style={{
@@ -1657,12 +1657,12 @@ export default function SBTGame() {
                         left:`${zone.x}%`, top:`${zone.y}%`,
                         width:`${zone.w}%`, height:`${zone.h}%`,
                         cursor:"pointer",
-                        border:isOpen?"2px solid #e8c840":"2px solid transparent",
+                        border:(isOpen&&zone.type!=="drink")?"2px solid #e8c840":"2px solid transparent",
                         borderRadius:6,
-                        background:isOpen?"rgba(232,200,64,.12)":"transparent",
+                        background:(isOpen&&zone.type!=="drink")?"rgba(232,200,64,.12)":"transparent",
                         transition:"all .2s", zIndex:15,
                       }}
-                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
+                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled&&zone.type!=="drink"){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
                       onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
                     {/* Menu de ações para zonas do tipo action / action+fala / famoso */}
