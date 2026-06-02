@@ -23,10 +23,10 @@ let _memRanking = [];
  
 async function fetchRanking() {
   if(!_sbConfigured()){
-    return [..._memRanking].sort((a,b)=>b.totalMin-a.totalMin).slice(0,20);
+    return [..._memRanking].sort((a,b)=>b.totalMin-a.totalMin).slice(0,50);
   }
   try {
-    const res = await fetch(`${_SB_REST}?select=*&order=total_min.desc&limit=20`, { headers:_SB_HEADERS });
+    const res = await fetch(`${_SB_REST}?select=*&order=total_min.desc&limit=50`, { headers:_SB_HEADERS });
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data.map(r=>({
@@ -39,7 +39,7 @@ async function fetchRanking() {
 async function submitScore(entry) {
   if(!_sbConfigured()){
     _memRanking.push(entry);
-    return [..._memRanking].sort((a,b)=>b.totalMin-a.totalMin).slice(0,20);
+    return [..._memRanking].sort((a,b)=>b.totalMin-a.totalMin).slice(0,50);
   }
   try {
     const payload = {
@@ -732,7 +732,7 @@ const RankingScreen = ({ ranking, loading, onBack, highlightName, highlightMin, 
         <div style={{textAlign:"center",marginBottom:16,flexShrink:0}}>
           <div style={{fontSize:42,marginBottom:4}}>🏅</div>
           <h1 style={{color:"#e8c840",fontSize:22,fontFamily:"monospace",letterSpacing:2,margin:0,textTransform:"uppercase"}}>Ranking Global</h1>
-          <div style={{fontSize:10,color:"#555",fontFamily:"monospace",letterSpacing:1,marginTop:4}}>Top 20 sobreviventes do SBT</div>
+          <div style={{fontSize:10,color:"#555",fontFamily:"monospace",letterSpacing:1,marginTop:4}}>Top 50 sobreviventes do SBT</div>
         </div>
  
         <div style={{flex:1,overflowY:"auto",background:"#06060f",border:"1px solid #1a1a2e",borderRadius:12,padding:"12px 14px",minHeight:0}}>
@@ -943,7 +943,7 @@ export default function SBTGame() {
     if(updated) setRanking(updated);
     else {
       // fallback local se o servidor falhar — mostra ao menos a sessão atual
-      setRanking(prev => [...prev, entry].sort((a,b)=>b.totalMin-a.totalMin).slice(0,20));
+      setRanking(prev => [...prev, entry].sort((a,b)=>b.totalMin-a.totalMin).slice(0,50));
     }
   };
  
