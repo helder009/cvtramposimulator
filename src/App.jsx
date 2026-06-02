@@ -482,7 +482,7 @@ const SCENES = {
   },
   jornalismo:{
     id:"jornalismo", name:"Jornalismo", emoji:"📡",
-    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908844/jornalismo_base_bslb9u.jpg",
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780424251/jornalismo_base_bslb9u.jpg",
     npcs:[], hotspots:[],
     clickZones:[
       { id:"zona1", label:"Redação", emoji:"🔥", x:2, y:38, w:17, h:17, type:"fala",
@@ -1507,12 +1507,12 @@ export default function SBTGame() {
           <div style={{display:"flex",flexDirection:"column",width:"780px",flexShrink:0,overflow:"hidden"}}>
  
             {/* NAV */}
-            <div style={{padding:"4px 6px",background:"#080814",borderBottom:"1px solid #151525",display:"flex",gap:3,flexShrink:0,justifyContent:"flex-start"}}>
+            <div style={{padding:"5px 8px",background:"#080814",borderBottom:"1px solid #151525",display:"flex",gap:4,flexShrink:0,width:"100%",boxSizing:"border-box"}}>
               {SCENE_ORDER.map(sid=>{
                 const s=SCENES[sid];
                 return (
                   <button key={sid} onClick={()=>{ setScene(sid); setHotspot(null); setNpcMsg(null); setOpenZone(null); }}
-                    style={{padding:"4px 7px",background:scene===sid?"#e8c840":"#111",color:scene===sid?"#000":"#666",border:`1px solid ${scene===sid?"#e8c840":"#1e1e2e"}`,borderRadius:5,cursor:"pointer",fontSize:9,fontFamily:"monospace",whiteSpace:"nowrap",flexShrink:0}}>
+                    style={{flex:1,minWidth:0,padding:"6px 4px",background:scene===sid?"#e8c840":"#111",color:scene===sid?"#000":"#666",border:`1px solid ${scene===sid?"#e8c840":"#1e1e2e"}`,borderRadius:5,cursor:"pointer",fontSize:10,fontFamily:"monospace",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",textAlign:"center"}}>
                     {s.emoji} {SCENE_NAV_LABELS[sid]}
                   </button>
                 );
