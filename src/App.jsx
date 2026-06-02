@@ -205,7 +205,7 @@ function sortearFamoso() {
 const SCENE_NAV_LABELS = {
   praca:"Praça", identidade:"Id. Visual", editoria:"Editoria",
   corredor:"Corredor", banheiro:"Banheiro", calango:"Calango",
-  externo:"Área Externa", jornalismo:"Jornalismo", cvt:"CVT"
+  externo:"Externa", jornalismo:"Jornalismo", cvt:"CVT"
 };
 const SCENE_ORDER_BASE = ["praca","identidade","editoria","corredor","banheiro","calango","externo"];
 const SCENE_ORDER_DAY2 = ["praca","identidade","editoria","corredor","banheiro","calango","externo","jornalismo"];
@@ -492,7 +492,9 @@ const SCENES = {
           { text:"Que legal", minDay:3 },
         ],
       },
-      { id:"zona2", label:"Coco Mágico", emoji:"🥥", x:5.5, y:70.1, w:8.6, h:16.8, type:"action+fala", actionIds:["agua_coco"],
+      { id:"zona2", label:"Coco Mágico", emoji:"🥥", x:5.5, y:70.1, w:8.6, h:16.8, type:"coco",
+        img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780424237/coco-magico_e0ovot.png",
+        actionIds:["agua_coco"],
         falas:[
           { text:"Oooooi eu sou o Coco Mágico, sou rico em águas!", minDay:1 },
           { text:"HIDRATASSAAAUMMM", minDay:1 },
@@ -685,7 +687,9 @@ const ActionMenu = ({ zone, actions, locks, shiftCfg, turn, usageCounts, getLimi
         const cat = ACTION_CAT[a.id];
         const locked = cat && (locks[cat]||0)>0;
         const dayLocked = a.availDay && (days+1) < a.availDay;
-        const unavail = dayLocked || (a.availFrom && shiftCfg && turn < timeToTurn(a.availFrom, shiftCfg.startH, shiftCfg.startM));
+        const unavail = dayLocked ||
+          (a.availFrom && shiftCfg && turn < timeToTurn(a.availFrom, shiftCfg.startH, shiftCfg.startM)) ||
+          (a.availUntil && shiftCfg && turn > timeToTurn(a.availUntil, shiftCfg.startH, shiftCfg.startM));
         const limit = getLimit(a.id);
         const usageCount = usageCounts[a.id]||0;
         const exhausted = limit!==undefined && usageCount>=limit;
@@ -873,6 +877,7 @@ export default function SBTGame() {
   const [famosoUsado, setFamosoUsado] = useState(false);  // já tirou foto hoje
   const [cvtUnlocked, setCvtUnlocked] = useState(false);  // chave secreta pegada → CVT no dia seguinte
   const [cvtAvailable, setCvtAvailable] = useState(false); // CVT já acessível
+  const [cocoVisible, setCocoVisible]   = useState(false);  // Coco Mágico disponível hoje no jornalismo
   const audioRef                      = useRef(null);
  
   // Stats iniciais variam por dia
@@ -891,12 +896,14 @@ export default function SBTGame() {
   useEffect(()=>{
     if(phase!=="game") return;
     const currentDay = days + 1;
-    if(currentDay >= 2 && Math.random() < 0.25){
+    if(currentDay >= 2 && Math.random() < 0.50){
       setFamosoAtual(sortearFamoso());
     } else {
       setFamosoAtual(null);
     }
     setFamosoUsado(false);
+    // Coco Mágico no Jornalismo: 25% de chance por dia (a partir do dia 2, quando o Jornalismo abre)
+    setCocoVisible(currentDay >= 2 && Math.random() < 0.25);
   },[phase, days]);
  
   // ── RANKING ────────────────────────────────────────────────────────────────
@@ -1177,7 +1184,7 @@ export default function SBTGame() {
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
     setLocks({});setCritModal(null);setInfoModal(null);setOpenZone(null);setUsageCounts({});
-    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);
+    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);
   };
  
   // Continua para o próximo dia sem resetar tudo
@@ -1224,7 +1231,7 @@ export default function SBTGame() {
     setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
     setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
     setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
-    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null);
+    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false);
     // Configura o novo jogo
     setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
     setPhase("game");
@@ -1500,12 +1507,12 @@ export default function SBTGame() {
           <div style={{display:"flex",flexDirection:"column",width:"780px",flexShrink:0,overflow:"hidden"}}>
  
             {/* NAV */}
-            <div style={{padding:"4px 8px",background:"#080814",borderBottom:"1px solid #151525",display:"flex",gap:4,flexShrink:0,overflowX:"auto"}}>
+            <div style={{padding:"4px 6px",background:"#080814",borderBottom:"1px solid #151525",display:"flex",gap:3,flexShrink:0,justifyContent:"flex-start"}}>
               {SCENE_ORDER.map(sid=>{
                 const s=SCENES[sid];
                 return (
                   <button key={sid} onClick={()=>{ setScene(sid); setHotspot(null); setNpcMsg(null); setOpenZone(null); }}
-                    style={{padding:"4px 10px",background:scene===sid?"#e8c840":"#111",color:scene===sid?"#000":"#666",border:`1px solid ${scene===sid?"#e8c840":"#1e1e2e"}`,borderRadius:5,cursor:"pointer",fontSize:10,fontFamily:"monospace",whiteSpace:"nowrap",flexShrink:0}}>
+                    style={{padding:"4px 7px",background:scene===sid?"#e8c840":"#111",color:scene===sid?"#000":"#666",border:`1px solid ${scene===sid?"#e8c840":"#1e1e2e"}`,borderRadius:5,cursor:"pointer",fontSize:9,fontFamily:"monospace",whiteSpace:"nowrap",flexShrink:0}}>
                     {s.emoji} {SCENE_NAV_LABELS[sid]}
                   </button>
                 );
@@ -1579,6 +1586,13 @@ export default function SBTGame() {
                     else { setOpenZone(zone); setZonaMsg(null); }
                     return;
                   }
+                  // Coco Mágico: só clicável quando visível; abre menu com fala+ação
+                  if(zone.type==="coco"){
+                    if(!cocoVisible) return;
+                    if(isOpen){ setOpenZone(null); setZonaMsg(null); }
+                    else { setOpenZone(zone); setZonaMsg(null); }
+                    return;
+                  }
                   // Zona só de falas
                   if(zone.type==="fala"){
                     const dispFalas = zone.falas.filter(f=>currentDay>=f.minDay);
@@ -1615,6 +1629,9 @@ export default function SBTGame() {
                 // Zona de famoso: só renderiza se há famoso disponível e não foi usado
                 if(zone.type==="famoso" && (!famosoAtual || famosoUsado)) return null;
  
+                // Zona do Coco Mágico: só renderiza quando visível
+                if(zone.type==="coco" && !cocoVisible) return null;
+ 
                 // Zona action+dia: não renderiza a partir do maxDay
                 const zoneDiaDisabled = zone.type==="action+dia" && zone.maxDay && currentDay > zone.maxDay;
  
@@ -1625,6 +1642,20 @@ export default function SBTGame() {
                       <img
                         src={famosoAtual.img}
                         alt={famosoAtual.nome}
+                        style={{
+                          position:"absolute",
+                          left:`${zone.x}%`, top:`${zone.y}%`,
+                          width:`${zone.w}%`, height:`${zone.h}%`,
+                          objectFit:"contain", objectPosition:"bottom",
+                          zIndex:12, pointerEvents:"none",
+                        }}
+                      />
+                    )}
+                    {/* Imagem do Coco Mágico (PNG transparente) */}
+                    {zone.type==="coco" && cocoVisible && (
+                      <img
+                        src={zone.img}
+                        alt="Coco Mágico"
                         style={{
                           position:"absolute",
                           left:`${zone.x}%`, top:`${zone.y}%`,
@@ -1649,7 +1680,7 @@ export default function SBTGame() {
                         <span style={{fontSize:18}}>⛔</span>
                       </div>
                     )}
-                    {/* Área de clique — highlight no hover (exceto zonas de beber água) */}
+                    {/* Área de clique — highlight no hover (exceto água, famoso e coco que têm visual próprio) */}
                     <div
                       onClick={handleZoneClick}
                       style={{
@@ -1657,16 +1688,16 @@ export default function SBTGame() {
                         left:`${zone.x}%`, top:`${zone.y}%`,
                         width:`${zone.w}%`, height:`${zone.h}%`,
                         cursor:"pointer",
-                        border:(isOpen&&zone.type!=="drink")?"2px solid #e8c840":"2px solid transparent",
+                        border:(isOpen&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco")?"2px solid #e8c840":"2px solid transparent",
                         borderRadius:6,
-                        background:(isOpen&&zone.type!=="drink")?"rgba(232,200,64,.12)":"transparent",
+                        background:(isOpen&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco")?"rgba(232,200,64,.12)":"transparent",
                         transition:"all .2s", zIndex:15,
                       }}
-                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled&&zone.type!=="drink"){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
+                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco"){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
                       onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
-                    {/* Menu de ações para zonas do tipo action / action+fala / famoso */}
-                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso")&&!zoneDiaDisabled&&(()=>{
+                    {/* Menu de ações para zonas do tipo action / action+fala / famoso / coco */}
+                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso"||zone.type==="coco")&&!zoneDiaDisabled&&(()=>{
                       let zoneActions = cur.actions.filter(a=>
                         (zone.actionIds||[]).includes(a.id) &&
                         !(a.availDay && (days+1) < a.availDay) &&            // oculta ações ainda não liberadas por dia
@@ -1680,9 +1711,9 @@ export default function SBTGame() {
                             : a
                         );
                       }
-                      // Se action+fala: ao clicar numa ação mostra uma fala aleatória também
+                      // Se action+fala ou coco: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
-                        if(zone.type==="action+fala"&&zone.falas){
+                        if((zone.type==="action+fala"||zone.type==="coco")&&zone.falas){
                           // Se a fala tem actionId, filtra só as da ação executada; senão, todas
                           const dispFalas=zone.falas.filter(f=>
                             currentDay>=f.minDay &&
