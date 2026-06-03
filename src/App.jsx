@@ -104,7 +104,7 @@ const ACTION_LIMITS = {
   // Jornalismo
   pacote_grafico:1, censurar_crime:4, checar_email:4, cafe_gui:2, agua_coco:1, chave_secreta:1,
   // CVT
-  cvt_figurino:2, cvt_cenario:2, cvt_fofoca:2,
+  cvt_clipe:1, cvt_lousa:4, cvt_fofoca:1, cvt_sofa:1, cvt_imaginacao:4, cvt_passeio:1,
 };
  
 // Categorias para bloqueio global por eventos críticos
@@ -123,7 +123,8 @@ const ACTION_CAT = {
   // Jornalismo
   pacote_grafico:"criar", censurar_crime:"criar", checar_email:"criar",
   cafe_gui:"socializar", agua_coco:null, chave_secreta:null,
-  cvt_figurino:"criar", cvt_cenario:"criar", cvt_fofoca:"socializar",
+  cvt_clipe:"criar", cvt_lousa:"criar", cvt_fofoca:"socializar",
+  cvt_sofa:"socializar", cvt_imaginacao:"criar", cvt_passeio:"mexer",
 };
  
 // ── NPCs ──────────────────────────────────────────────────────────────────────
@@ -531,12 +532,62 @@ const SCENES = {
   },
   cvt:{
     id:"cvt", name:"CVT — Novela", emoji:"📺",
-    bg:"linear-gradient(160deg,#1a1025,#2a1838,#0f0818)",
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780443067/cvt_base_ut79mt.jpg",
     npcs:[], hotspots:[],
+    clickZones:[
+      { id:"zonaSara", label:"SARA", emoji:"🤖", x:6.7, y:3.9, w:9.4, h:18.7, type:"sara",
+        img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780443067/sara_xgjsks.png",
+        actionIds:["pedir_sara"],
+        falas:[
+          { text:"Oi eu sou S.A.R.A. (Sistema Auxiliar Racional Autônomo), precisa da minha ajuda?", minDay:1 },
+          { text:"A minha voz é um pouco velha, mas estou novinha em folha...", minDay:1 },
+        ],
+      },
+      { id:"zona1", label:"Mesa de animação", emoji:"🎬", x:8.5, y:49.8, w:19.2, h:25.6, type:"action+fala", actionIds:["cvt_clipe"],
+        falas:[
+          { text:"Mexe, mexe, mexe com as mããããos!!", minDay:1 },
+        ],
+      },
+      { id:"zona2", label:"Lousa", emoji:"🖍️", x:36.9, y:39.5, w:8.6, h:19, type:"action", actionIds:["cvt_lousa","cvt_fofoca"] },
+      { id:"zona3", label:"Sofá", emoji:"🛋️", x:39.7, y:62.9, w:14.7, h:13.4, type:"action+fala", actionIds:["cvt_sofa","cvt_fofoca"],
+        falas:[
+          { text:"Pô, sofázinho macio.", minDay:1, actionId:"cvt_sofa" },
+        ],
+      },
+      { id:"zona4", label:"Posters", emoji:"🖼️", x:59.1, y:37.2, w:13.5, h:16.6, type:"fala",
+        falas:[
+          { text:"Um poster irado do Megaman", minDay:1 },
+          { text:"Saudosas e belíssimas ilustrações", minDay:1 },
+        ],
+      },
+      { id:"zona5", label:"Mesa de criação", emoji:"✏️", x:60.4, y:56.3, w:16.7, h:14.1, type:"action", actionIds:["cvt_imaginacao"] },
+      { id:"zona6", label:"Saída de ar", emoji:"❄️", x:78, y:56.3, w:8.1, h:8.8, type:"fala",
+        falas:[
+          { text:"Que frio da p*#!@", minDay:1 },
+          { text:"Alguém coloca um papelão nessa saída de ar?", minDay:1 },
+        ],
+      },
+      { id:"zona7", label:"Cenário da novela", emoji:"🎭", x:83, y:47.8, w:17, h:35.4, type:"action+fala", actionIds:["cvt_passeio"],
+        falas:[
+          { text:"Que legaaall, você relembrou de várias cenas legais das novelas, foi uma verdadeira viagem!", minDay:1 },
+        ],
+      },
+      { id:"zona8", label:"Buraco do rato", emoji:"🐀", x:34.7, y:72.1, w:2.7, h:5.5, type:"fala",
+        falas:[
+          { text:"Lembra que uma vez um gato desapareceu por aqui?", minDay:1 },
+          { text:"Rato meu querido rato, eu não sou assim de fino trato...", minDay:1 },
+          { text:"Viu a SARA por aí?", minDay:6 },
+        ],
+      },
+    ],
     actions:[
-      {id:"cvt_figurino",  label:"Conferir figurinos",       emoji:"👗", time:2, effects:{criar:+20,mexer:-5, socializar:+10}, msg:"Você explorou o guarda-roupa da novela. Inspiração visual nas alturas."},
-      {id:"cvt_cenario",   label:"Visitar o cenário",        emoji:"🎬", time:2, effects:{criar:+30,mexer:+10,socializar:+5},  msg:"Andou pelo set da novela. Tudo é falso, mas parece tão real."},
-      {id:"cvt_fofoca",    label:"Fofocar com o elenco",     emoji:"🎭", time:2, effects:{criar:0,  mexer:0,  socializar:+50}, msg:"As fofocas dos bastidores valem ouro. Socialização nas alturas."},
+      {id:"cvt_clipe",      label:"Animar um Clipe Musical",       emoji:"🎬", time:16, effects:{criar:+50,mexer:-50,socializar:+10}, msg:"4 horas animando o clipe. Frame a frame. Sua alma virou keyframe."},
+      {id:"cvt_lousa",      label:"Desenhar na lousa",            emoji:"🖍️", time:1,  effects:{criar:+10,mexer:-10,socializar:0},  msg:"Rabiscos na lousa. Pode ser arte, pode ser só desabafo."},
+      {id:"cvt_fofoca",     label:"Fofocar sobre o fim dos tempos",emoji:"🔮", time:4,  effects:{criar:-10,mexer:-10,socializar:+50}, msg:"Teorias apocalípticas trocadas. Socialização nas alturas, esperança no chão."},
+      {id:"cvt_sofa",       label:"Sentar no sofá",               emoji:"🛋️", time:4,  effects:{criar:-30,mexer:-30,socializar:+30}, msg:"O sofá te abraçou. Difícil levantar. Mas que paz."},
+      {id:"cvt_imaginacao", label:"Desenhar na imaginação",       emoji:"✏️", time:2,  effects:{criar:+20,mexer:-10,socializar:0},  msg:"30 minutos imaginando. Nada no papel, tudo na cabeça. Conta como trabalho."},
+      {id:"cvt_passeio",    label:"Passeio Nostálgico",           emoji:"🎭", time:8,  effects:{criar:-10,mexer:+50,socializar:+10}, msg:"2 horas passeando pelos cenários antigos. As pernas e o coração agradecem."},
+      {id:"pedir_sara",     label:"Pedir ajuda pra SARA",         emoji:"🤖", time:0,  special:"sara", effects:{}, msg:"S.A.R.A. processou tudo num piscar. Todos os bloqueios foram dissolvidos."},
     ]
   }
 };
@@ -878,6 +929,7 @@ export default function SBTGame() {
   const [cvtUnlocked, setCvtUnlocked] = useState(false);  // chave secreta pegada → CVT no dia seguinte
   const [cvtAvailable, setCvtAvailable] = useState(false); // CVT já acessível
   const [cocoVisible, setCocoVisible]   = useState(false);  // Coco Mágico disponível hoje no jornalismo
+  const [saraVisible, setSaraVisible]   = useState(false);  // SARA disponível hoje no CVT
   const audioRef                      = useRef(null);
  
   // Stats iniciais variam por dia
@@ -904,6 +956,8 @@ export default function SBTGame() {
     setFamosoUsado(false);
     // Coco Mágico no Jornalismo: 25% de chance por dia (a partir do dia 2, quando o Jornalismo abre)
     setCocoVisible(currentDay >= 2 && Math.random() < 0.25);
+    // SARA no CVT: 25% de chance por dia (só relevante quando o CVT está disponível)
+    setSaraVisible(Math.random() < 0.25);
   },[phase, days]);
  
   // ── RANKING ────────────────────────────────────────────────────────────────
@@ -1026,6 +1080,14 @@ export default function SBTGame() {
     });
   };
  
+  // A partir do dia 6, eventos críticos bloqueiam +1 turno por dia, até o dobro do valor original
+  const scaledLockTurns = (baseTurns) => {
+    const currentDay = days + 1;
+    if(currentDay < 6) return baseTurns;
+    const bonus = Math.min(currentDay - 5, baseTurns); // dia6=+1, dia7=+2... limitado ao valor base
+    return baseTurns + bonus; // máximo = 2× baseTurns
+  };
+ 
   const maybeCritical = (sceneId) => {
     const evts = CRITICAL_EVENTS[sceneId];
     if(!evts) return;
@@ -1038,10 +1100,12 @@ export default function SBTGame() {
     if(pool.length===0) return;
     const ev = pool[Math.floor(Math.random()*pool.length)];
     if(ev.oncePer==="day") setUsedCriticals(prev=>({...prev,[ev.id]:true}));
-    if(ev.type==="lock")       setLocks(prev=>({...prev,[ev.category]:Math.max(prev[ev.category]||0,ev.turns)}));
-    if(ev.type==="lock_multi") ev.categories.forEach(cat=>setLocks(prev=>({...prev,[cat]:Math.max(prev[cat]||0,ev.turns)})));
+    const lockT = scaledLockTurns(ev.turns);
+    if(ev.type==="lock")       setLocks(prev=>({...prev,[ev.category]:Math.max(prev[ev.category]||0,lockT)}));
+    if(ev.type==="lock_multi") ev.categories.forEach(cat=>setLocks(prev=>({...prev,[cat]:Math.max(prev[cat]||0,lockT)})));
     else if(ev.type==="set_stat"){ if(ev.stat==="agua") setAgua(ev.value); else setStats(prev=>({...prev,[ev.stat]:ev.value})); }
-    setCritModal(ev);
+    // passa o turns escalonado pro modal exibir a duração real
+    setCritModal({...ev, turns: (ev.type==="lock"||ev.type==="lock_multi") ? lockT : ev.turns});
     addLog(`🚨 EVENTO CRÍTICO: ${ev.title}`,"critical");
   };
  
@@ -1118,6 +1182,16 @@ export default function SBTGame() {
       addLog(`[${lbl2}] 🥥 ${a.msg}`,"water"); return;
     }
  
+    // SARA — desbloqueia todas as categorias bloqueadas
+    if(a.special==="sara"){
+      setLocks({});
+      incUsage(a.id);
+      const lbls=turnLabels[Math.min(turn,TOTAL_TURNS-1)];
+      addLog(`[${lbls}] 🤖 ${a.msg}`,"info");
+      setOpenZone(null); setHotspot(null);
+      return;
+    }
+ 
     // Chave Secreta — libera CVT no dia seguinte
     if(a.special==="chave_secreta"){
       if(cvtUnlocked||cvtAvailable) return;
@@ -1184,7 +1258,7 @@ export default function SBTGame() {
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
     setLocks({});setCritModal(null);setInfoModal(null);setOpenZone(null);setUsageCounts({});
-    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);
+    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);
   };
  
   // Continua para o próximo dia sem resetar tudo
@@ -1231,7 +1305,7 @@ export default function SBTGame() {
     setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
     setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
     setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
-    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false);
+    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false);
     // Configura o novo jogo
     setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
     setPhase("game");
@@ -1593,6 +1667,13 @@ export default function SBTGame() {
                     else { setOpenZone(zone); setZonaMsg(null); }
                     return;
                   }
+                  // SARA: só clicável quando visível; abre menu com fala+ação
+                  if(zone.type==="sara"){
+                    if(!saraVisible) return;
+                    if(isOpen){ setOpenZone(null); setZonaMsg(null); }
+                    else { setOpenZone(zone); setZonaMsg(null); }
+                    return;
+                  }
                   // Zona só de falas
                   if(zone.type==="fala"){
                     const dispFalas = zone.falas.filter(f=>currentDay>=f.minDay);
@@ -1632,6 +1713,9 @@ export default function SBTGame() {
                 // Zona do Coco Mágico: só renderiza quando visível
                 if(zone.type==="coco" && !cocoVisible) return null;
  
+                // Zona da SARA: só renderiza quando visível
+                if(zone.type==="sara" && !saraVisible) return null;
+ 
                 // Zona action+dia: não renderiza a partir do maxDay
                 const zoneDiaDisabled = zone.type==="action+dia" && zone.maxDay && currentDay > zone.maxDay;
  
@@ -1665,6 +1749,20 @@ export default function SBTGame() {
                         }}
                       />
                     )}
+                    {/* Imagem da SARA (PNG transparente) */}
+                    {zone.type==="sara" && saraVisible && (
+                      <img
+                        src={zone.img}
+                        alt="SARA"
+                        style={{
+                          position:"absolute",
+                          left:`${zone.x}%`, top:`${zone.y}%`,
+                          width:`${zone.w}%`, height:`${zone.h}%`,
+                          objectFit:"contain", objectPosition:"center",
+                          zIndex:12, pointerEvents:"none",
+                        }}
+                      />
+                    )}
                     {/* Overlay de fechado para zonas action+dia desativadas */}
                     {zoneDiaDisabled && (
                       <div style={{
@@ -1688,16 +1786,16 @@ export default function SBTGame() {
                         left:`${zone.x}%`, top:`${zone.y}%`,
                         width:`${zone.w}%`, height:`${zone.h}%`,
                         cursor:"pointer",
-                        border:(isOpen&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco")?"2px solid #e8c840":"2px solid transparent",
+                        border:(isOpen&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco"&&zone.type!=="sara")?"2px solid #e8c840":"2px solid transparent",
                         borderRadius:6,
-                        background:(isOpen&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco")?"rgba(232,200,64,.12)":"transparent",
+                        background:(isOpen&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco"&&zone.type!=="sara")?"rgba(232,200,64,.12)":"transparent",
                         transition:"all .2s", zIndex:15,
                       }}
-                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco"){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
+                      onMouseEnter={e=>{if(!isOpen&&!zoneDiaDisabled&&zone.type!=="drink"&&zone.type!=="famoso"&&zone.type!=="coco"&&zone.type!=="sara"){e.currentTarget.style.border="2px solid rgba(232,200,64,.4)";e.currentTarget.style.background="rgba(232,200,64,.06)";}}}
                       onMouseLeave={e=>{if(!isOpen){e.currentTarget.style.border="2px solid transparent";e.currentTarget.style.background="transparent";}}}
                     />
-                    {/* Menu de ações para zonas do tipo action / action+fala / famoso / coco */}
-                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso"||zone.type==="coco")&&!zoneDiaDisabled&&(()=>{
+                    {/* Menu de ações para zonas do tipo action / action+fala / famoso / coco / sara */}
+                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso"||zone.type==="coco"||zone.type==="sara")&&!zoneDiaDisabled&&(()=>{
                       let zoneActions = cur.actions.filter(a=>
                         (zone.actionIds||[]).includes(a.id) &&
                         !(a.availDay && (days+1) < a.availDay) &&            // oculta ações ainda não liberadas por dia
@@ -1711,9 +1809,9 @@ export default function SBTGame() {
                             : a
                         );
                       }
-                      // Se action+fala ou coco: ao clicar numa ação mostra uma fala aleatória também
+                      // Se action+fala, coco ou sara: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
-                        if((zone.type==="action+fala"||zone.type==="coco")&&zone.falas){
+                        if((zone.type==="action+fala"||zone.type==="coco"||zone.type==="sara")&&zone.falas){
                           // Se a fala tem actionId, filtra só as da ação executada; senão, todas
                           const dispFalas=zone.falas.filter(f=>
                             currentDay>=f.minDay &&
