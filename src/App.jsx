@@ -548,7 +548,7 @@ const SCENES = {
           { text:"Mexe, mexe, mexe com as mããããos!!", minDay:1 },
         ],
       },
-      { id:"zona2", label:"Lousa", emoji:"🖍️", x:36.9, y:39.5, w:8.6, h:19, type:"action", actionIds:["cvt_lousa","cvt_fofoca"] },
+      { id:"zona2", label:"Lousa", emoji:"🖍️", x:36.9, y:39.5, w:8.6, h:19, type:"action", actionIds:["cvt_lousa"] },
       { id:"zona3", label:"Sofá", emoji:"🛋️", x:39.7, y:62.9, w:14.7, h:13.4, type:"action+fala", actionIds:["cvt_sofa","cvt_fofoca"],
         falas:[
           { text:"Pô, sofázinho macio.", minDay:1, actionId:"cvt_sofa" },
@@ -561,7 +561,7 @@ const SCENES = {
         ],
       },
       { id:"zona5", label:"Mesa de criação", emoji:"✏️", x:60.4, y:56.3, w:16.7, h:14.1, type:"action", actionIds:["cvt_imaginacao"] },
-      { id:"zona6", label:"Saída de ar", emoji:"❄️", x:78, y:56.3, w:8.1, h:8.8, type:"fala",
+      { id:"zona6", label:"Saída de ar", emoji:"❄️", x:77.4, y:17.1, w:7.7, h:9.3, type:"fala",
         falas:[
           { text:"Que frio da p*#!@", minDay:1 },
           { text:"Alguém coloca um papelão nessa saída de ar?", minDay:1 },
