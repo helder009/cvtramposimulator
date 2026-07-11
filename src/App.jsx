@@ -632,12 +632,12 @@ const SCENES = {
           { text:"O jardineiro é Jesus, e as arvres somos nozes.", minDay:4 },
         ],
       },
-      { id:"zona3", label:"Segurança", emoji:"👮", x:47.9, y:66.1, w:5.8, h:14.6, type:"action+fala", actionIds:["jogar_futebol"],
+      { id:"zona3", label:"Segurança", emoji:"👮", x:47.9, y:66.1, w:5.8, h:14.6, type:"action+fala", sempreFala:true, actionIds:["jogar_futebol"],
         falas:[
           { text:"É você que tá colocando comida pros gatos aqui?", minDay:1 },
           { text:"Se eu pegar você passando o crachá pra outra pessoa, vai se ver comigo!", minDay:1 },
           { text:"Não confie totalmente na rádio peão.", minDay:1 },
-          { text:"Quer a chave da quadra? Tem que fazer a reserva.", minDay:1 },
+          { text:"Quer a chave da quadra? Tem que fazer a reserva.", minDay:1, ocultarSe:"futebolUsado" },
           { text:"Se o Xaropinho aparecer na praça de alimentação, liga no meu ramal!", minDay:2 },
         ],
       },
@@ -2990,8 +2990,8 @@ export default function SBTGame() {
     setDayIntro(currentDay);
     // Comida do dia na ID Visual: sempre há uma, sorteada aleatoriamente (pode repetir)
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
-    // Bonde da Água no Corredor: 25% de chance/dia a partir do dia 3 (some de vez após usar a ação)
-    setBondeVisible(currentDay >= 3 && !usedOnce["encher_bonde"] && Math.random() < 0.25);
+    // Bonde da Água no Corredor: 33% de chance/dia a partir do dia 2 (some de vez após usar a ação)
+    setBondeVisible(currentDay >= 2 && !usedOnce["encher_bonde"] && Math.random() < 0.33);
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
@@ -3415,6 +3415,8 @@ export default function SBTGame() {
     drainHydIfNeeded(a.id);
     incUsage(a.id);
     if(a.onceGame) setUsedOnce(prev=>({...prev,[a.id]:true}));
+    // Vera Verão desaparece depois de usada (como a Loira do Banheiro)
+    if(a.id==="est_veraverao") setVeraVisible(false);
     if(musicOn) sfx("action", volume);
 
     const tl = a.time===0?"instantâneo":`${a.time*15}min`;
@@ -4280,8 +4282,21 @@ export default function SBTGame() {
                       setOpenZone(null);
                       return;
                     } else {
-                      // todas as ações esgotadas por uso: não mostra nada
-                      setOpenZone(null); setZonaMsg(null);
+                      // todas as ações esgotadas por uso
+                      if(zone.sempreFala){
+                        // zonas marcadas como "sempre fala" (ex: Segurança) voltam a mostrar falas
+                        const dispFalas = zone.falas.filter(f=>
+                          currentDay>=f.minDay && f.actionId===undefined &&
+                          !(f.ocultarSe==="futebolUsado" && futebolUsado)   // some falas contextuais já resolvidas
+                        );
+                        if(dispFalas.length>0){
+                          const f = dispFalas[Math.floor(Math.random()*dispFalas.length)];
+                          setZonaMsg({text:`${zone.emoji} "${f.text}"`, zona:zone.id});
+                        }
+                      } else {
+                        setZonaMsg(null);
+                      }
+                      setOpenZone(null);
                       return;
                     }
                   }
