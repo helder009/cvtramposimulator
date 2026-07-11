@@ -161,7 +161,7 @@ const ACTION_CAT = {
   trocar_ideia:"socializar", papo_kell:"socializar", cafe_edit:"socializar", meme_jess:"socializar",
   padoca_dia:"socializar", biblio_samples:"socializar",
   fazer_laboral:"mexer",
-  subir_escada:"mexer", encher_garr:"mexer", janela_cor:null,
+  subir_escada:"mexer", encher_garr:"mexer", encher_bonde:"mexer", janela_cor:null,
   lavar_rosto:"mexer", pausa_estrategica:"mexer", cochilo:null,
   descargas_palavroes:null, pedir_loira:null, chamar_loira:null,
   cafe_praca:"socializar", cafe_caro:"socializar", almoco_rapido:null, mesa_quieta:"mexer", foto_famoso:"socializar", ir_calango:"mexer",
@@ -544,11 +544,16 @@ const SCENES = {
       },
       { id:"zona4", label:"Bebedouro", emoji:"🚰", x:67.9, y:43.7, w:10.1, h:17.1, type:"action", actionIds:["encher_garr"] },
       { id:"zona5", label:"Janela", emoji:"🪟", x:80.1, y:26.8, w:11.5, h:65.9, type:"action", actionIds:["janela_cor"] },
+      { id:"zonaBonde", label:"Bonde da Água", emoji:"💦", x:50.4, y:43.3, w:16.1, h:36.7, type:"bonde",
+        img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1783733699/bonde-da-agua_kkitv0.png",
+        actionIds:["encher_bonde"],
+      },
     ],
     actions:[
       {id:"subir_escada", label:"Subir/descer escada",        emoji:"🪜", time:1, effects:{criar:-20,mexer:+40,socializar:0},           msg:"Ufa! Dois lances. Pode colocar no currículo: 'pratica atividade física'."},
       {id:"ir_banheiro",  label:"Ir ao banheiro",             emoji:"🚻", time:0, effects:{}, navigate:"banheiro", msg:"Você foi ao banheiro."},
       {id:"encher_garr",  label:"Encher a garrafinha d'água", emoji:"🚿", time:1, special:"encher", effects:{criar:0,mexer:+30,socializar:+30}, msg:"Garrafinha cheia. Você é responsável e consciente. Por hoje."},
+      {id:"encher_bonde", label:"Encher a garrafinha com a galera", emoji:"💦", time:1, special:"encher_bonde", effects:{criar:0,mexer:+50,socializar:+50}, msg:"Encheu a garrafa no maior papo com o Bonde da Água. Hidratado e enturmado!"},
       {id:"janela_cor",   label:"Olhar pela janela",          emoji:"🪟", time:2, effects:{criar:+2, mexer:+20,socializar:0},           msg:"Cinco minutos fitando o horizonte. Isso é pesquisa de referência visual."},
     ]
   },
@@ -851,7 +856,7 @@ const SCENES = {
         ],
       },
       { id:"zona5", label:"Roda a Roda", emoji:"🎡", x:80.9, y:34.4, w:15.4, h:32, type:"action", actionIds:["est_rodaroda"] },
-      { id:"zonaVera", label:"Vera Verão", emoji:"👻", x:64, y:38.4, w:9.6, h:26.8, type:"vera",
+      { id:"zonaVera", label:"Vera Verão", emoji:"👻", x:64, y:38.4, w:9.4, h:29.3, type:"vera",
         img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1783116461/est_veraverao_s96kbk.png",
         actionIds:["est_veraverao"],
         falas:[
@@ -2922,6 +2927,7 @@ export default function SBTGame() {
   const [statFloats, setStatFloats]     = useState({});     // números flutuantes de efeito nas barras
   const [dayIntro, setDayIntro]         = useState(null);   // overlay "DIA X" na transição de dia
   const [comidaHoje, setComidaHoje]     = useState(null);   // comida do dia na ID Visual
+  const [bondeVisible, setBondeVisible] = useState(false);  // Bonde da Água no Corredor hoje
   const [quadraReservada, setQuadraReservada] = useState(false); // reservou a quadra com o Hélder
   const [futebolUsado, setFutebolUsado] = useState(false);  // dinâmica do futebol já usada (1x no jogo, não reseta)
   const [futebolOpen, setFutebolOpen]   = useState(false);  // minigame de futebol aberto
@@ -2984,6 +2990,8 @@ export default function SBTGame() {
     setDayIntro(currentDay);
     // Comida do dia na ID Visual: sempre há uma, sorteada aleatoriamente (pode repetir)
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
+    // Bonde da Água no Corredor: 25% de chance/dia a partir do dia 3 (some de vez após usar a ação)
+    setBondeVisible(currentDay >= 3 && !usedOnce["encher_bonde"] && Math.random() < 0.25);
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
@@ -3233,6 +3241,15 @@ export default function SBTGame() {
 
     // Encher garrafa
     if(a.special==="encher"){ setGarrafa(100); applyFx(a.effects); drainHydIfNeeded(a.id); incUsage(a.id); addLog(`[${lbl}] 🫙 Garrafa enchida! ${a.msg} (15min)`); advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null); return; }
+    if(a.special==="encher_bonde"){
+      setGarrafa(100); applyFx(a.effects); incUsage(a.id);
+      setUsedOnce(prev=>({...prev,[a.id]:true}));
+      setBondeVisible(false);
+      if(musicOn) sfx("action", volume);
+      addLog(`[${lbl}] 💦 ${a.msg} (15min)`);
+      advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null);
+      return;
+    }
 
     // Fumar
     if(a.special==="fumar"){ setAgua(p=>clamp(p/2)); }
@@ -3532,7 +3549,7 @@ export default function SBTGame() {
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
     setLocks({});setCritModal(null);setInfoModal(null);setOpenZone(null);setUsageCounts({});
-    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);setThuttiGame(null);setMusicTrack(MUSIC_MAIN);setUsedOnce({});setExtChar(null);setLastExtChar(null);setVeraVisible(false);setRodaOpen(false);setDescargasFeitas(false);setLoiraChamada(false);setComidaHoje(null);setQuadraReservada(false);setFutebolUsado(false);setFutebolOpen(false);
+    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);setThuttiGame(null);setMusicTrack(MUSIC_MAIN);setUsedOnce({});setExtChar(null);setLastExtChar(null);setVeraVisible(false);setRodaOpen(false);setDescargasFeitas(false);setLoiraChamada(false);setComidaHoje(null);setQuadraReservada(false);setFutebolUsado(false);setFutebolOpen(false);setBondeVisible(false);
   };
 
   // Continua para o próximo dia sem resetar tudo
@@ -3595,7 +3612,7 @@ export default function SBTGame() {
     setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
     setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
     setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
-    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false); setThuttiGame(null); setMusicTrack(MUSIC_MAIN); setUsedOnce({}); setExtChar(null); setLastExtChar(null); setVeraVisible(false); setRodaOpen(false); setDescargasFeitas(false); setLoiraChamada(false); setComidaHoje(null); setQuadraReservada(false); setFutebolUsado(false); setFutebolOpen(false);
+    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false); setThuttiGame(null); setMusicTrack(MUSIC_MAIN); setUsedOnce({}); setExtChar(null); setLastExtChar(null); setVeraVisible(false); setRodaOpen(false); setDescargasFeitas(false); setLoiraChamada(false); setComidaHoje(null); setQuadraReservada(false); setFutebolUsado(false); setFutebolOpen(false); setBondeVisible(false);
     // Configura o novo jogo
     setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
     setPhase("game");
@@ -4086,13 +4103,13 @@ export default function SBTGame() {
 
               {/* TRANSIÇÃO DE DIA — "DIA X" centralizada na área do cenário */}
               {dayIntro&&(
-                <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:60,display:"flex",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,.78))",animation:"dayintro 2s ease forwards"}}>
+                <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:60,display:"flex",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center, rgba(0,0,0,.82), rgba(0,0,0,.94))",animation:"dayintro 2s ease forwards"}}>
                   <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:11,letterSpacing:7,color:"#8888aa",fontFamily:"monospace",marginBottom:5}}>EXPEDIENTE</div>
+                    <div style={{fontSize:11,letterSpacing:7,color:"#ffffff",fontFamily:"monospace",marginBottom:5}}>EXPEDIENTE</div>
                     <div style={{fontSize:58,fontWeight:900,fontFamily:"'Arial Black',Arial,sans-serif",color:"#e8c840",letterSpacing:3,textShadow:"0 0 32px rgba(232,200,64,.5), 0 3px 0 #7a6410"}}>
                       DIA {dayIntro}
                     </div>
-                    <div style={{fontSize:10,color:"#888",fontFamily:"monospace",marginTop:7}}>Bata o ponto e sobreviva.</div>
+                    <div style={{fontSize:10,color:"#ffffff",fontFamily:"monospace",marginTop:7}}>Bata o ponto e sobreviva.</div>
                   </div>
                 </div>
               )}
@@ -4190,7 +4207,14 @@ export default function SBTGame() {
                   }
                   // Comida do dia (ID Visual): sempre presente
                   if(zone.type==="comida"){
-                    if(!comidaHoje) return;
+                    if(!comidaHoje || (usageCounts["comer_comida"]||0)>0) return;
+                    if(isOpen){ setOpenZone(null); setZonaMsg(null); }
+                    else { setOpenZone(zone); setZonaMsg(null); }
+                    return;
+                  }
+                  // Bonde da Água (Corredor): só clicável quando visível
+                  if(zone.type==="bonde"){
+                    if(!bondeVisible) return;
                     if(isOpen){ setOpenZone(null); setZonaMsg(null); }
                     else { setOpenZone(zone); setZonaMsg(null); }
                     return;
@@ -4224,26 +4248,40 @@ export default function SBTGame() {
                   }
                   // Zona de ação ou action+fala ou action+dia — toggle menu
                   if(zone.type==="action+dia" && zoneDiaDisabled){ setZonaMsg({text:"⛔ Fechado a partir do 3º dia.", zona:zone.id}); return; }
-                  // action+fala: se nenhuma ação da zona está disponível agora, comporta como fala pura
+                  // action+fala: decide entre abrir menu, falar, ou nada
                   if(zone.type==="action+fala" && zone.falas){
-                    const availAct = (zone.actionIds||[]).some(aid=>{
+                    // Verifica cada ação: disponível agora, bloqueada por pré-requisito, ou esgotada por uso
+                    let temDisponivel = false;   // alguma ação clicável agora → abre menu
+                    let temBloqueada = false;    // ação existe mas espera pré-requisito → ainda "fala"
+                    (zone.actionIds||[]).forEach(aid=>{
                       const act = (cur.actions||[]).find(a=>a.id===aid);
-                      if(!act) return false;
-                      if(act.availDay && currentDay < act.availDay) return false;
-                      if(act.special==="voltinha_pos" && !calangoPassed) return false;
-                      if(act.special==="thutti" && !calangoPassed) return false;
-                      if(act.special==="chamar_loira" && (!descargasFeitas || loiraChamada)) return false;
-                      if(act.special==="futebol" && (!quadraReservada || futebolUsado)) return false;
-                      if(act.special==="reservar_quadra" && (quadraReservada || futebolUsado)) return false;
-                      return !isExhausted(aid);
+                      if(!act) return;
+                      // Condições de pré-requisito (a ação vai aparecer mais tarde quando cumpridas)
+                      const bloqueada =
+                        (act.availDay && currentDay < act.availDay) ||
+                        (act.special==="voltinha_pos" && !calangoPassed) ||
+                        (act.special==="thutti" && !calangoPassed) ||
+                        (act.special==="chamar_loira" && !descargasFeitas && !loiraChamada) ||
+                        (act.special==="futebol" && !quadraReservada) ||
+                        (act.special==="reservar_quadra" && !quadraReservada && currentDay < 5);
+                      if(bloqueada){ temBloqueada = true; return; }
+                      // Não bloqueada: está disponível se não estiver esgotada por uso
+                      if(!isExhausted(aid)) temDisponivel = true;
                     });
-                    if(!availAct){
+                    if(temDisponivel){
+                      // abre o menu normalmente (segue para o toggle abaixo)
+                    } else if(temBloqueada){
+                      // ainda não liberada: comporta como fala pura (mostra fala genérica)
                       const dispFalas = zone.falas.filter(f=>currentDay>=f.minDay && f.actionId===undefined);
                       if(dispFalas.length>0){
                         const f = dispFalas[Math.floor(Math.random()*dispFalas.length)];
                         setZonaMsg({text:`${zone.emoji} "${f.text}"`, zona:zone.id});
                       }
                       setOpenZone(null);
+                      return;
+                    } else {
+                      // todas as ações esgotadas por uso: não mostra nada
+                      setOpenZone(null); setZonaMsg(null);
                       return;
                     }
                   }
@@ -4262,7 +4300,10 @@ export default function SBTGame() {
                 if(zone.type==="extchar" && !extChar) return null;
                 if(zone.type==="vera" && !veraVisible) return null;
                 if(zone.type==="loira" && (!loiraChamada || usedOnce["pedir_loira"])) return null;
-                if(zone.type==="comida" && !comidaHoje) return null;
+                if(zone.type==="comida" && (!comidaHoje || (usageCounts["comer_comida"]||0)>0)) return null;
+                if(zone.type==="bonde" && !bondeVisible) return null;
+                // Fundo do corredor (zona3) fica inativo quando o Bonde da Água está visível
+                if(scene==="corredor" && zone.id==="zona3" && bondeVisible) return null;
 
                 // Zona action+dia: não renderiza a partir do maxDay
                 const zoneDiaDisabled = zone.type==="action+dia" && zone.maxDay && currentDay > zone.maxDay;
@@ -4354,10 +4395,24 @@ export default function SBTGame() {
                       />
                     )}
                     {/* Imagem da comida do dia (PNG transparente) */}
-                    {zone.type==="comida" && comidaHoje && (
+                    {zone.type==="comida" && comidaHoje && (usageCounts["comer_comida"]||0)===0 && (
                       <img
                         src={comidaHoje.img}
                         alt={comidaHoje.nome}
+                        style={{
+                          position:"absolute",
+                          left:`${zone.x}%`, top:`${zone.y}%`,
+                          width:`${zone.w}%`, height:`${zone.h}%`,
+                          objectFit:"contain", objectPosition:"bottom",
+                          zIndex:12, pointerEvents:"none",
+                        }}
+                      />
+                    )}
+                    {/* Imagem do Bonde da Água (PNG transparente) */}
+                    {zone.type==="bonde" && bondeVisible && (
+                      <img
+                        src={zone.img}
+                        alt="Bonde da Água"
                         style={{
                           position:"absolute",
                           left:`${zone.x}%`, top:`${zone.y}%`,
@@ -4389,7 +4444,7 @@ export default function SBTGame() {
                       const zy = zone.type==="extchar"&&extChar ? extChar.y : zone.y;
                       const zw = zone.type==="extchar"&&extChar ? extChar.w : zone.w;
                       const zh = zone.type==="extchar"&&extChar ? extChar.h : zone.h;
-                      const noHl = zone.type==="drink"||zone.type==="famoso"||zone.type==="coco"||zone.type==="sara"||zone.type==="extchar"||zone.type==="vera"||zone.type==="loira"||zone.type==="comida";
+                      const noHl = zone.type==="drink"||zone.type==="famoso"||zone.type==="coco"||zone.type==="sara"||zone.type==="extchar"||zone.type==="vera"||zone.type==="loira"||zone.type==="comida"||zone.type==="bonde";
                       return (
                         <div
                           onClick={handleZoneClick}
@@ -4409,7 +4464,7 @@ export default function SBTGame() {
                       );
                     })()}
                     {/* Menu de ações para zonas do tipo action / action+fala / famoso / coco / sara / extchar */}
-                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso"||zone.type==="coco"||zone.type==="sara"||zone.type==="extchar"||zone.type==="vera"||zone.type==="loira"||zone.type==="comida")&&!zoneDiaDisabled&&(()=>{
+                    {isOpen&&(zone.type==="action"||zone.type==="action+fala"||zone.type==="action+dia"||zone.type==="fala+chave"||zone.type==="famoso"||zone.type==="coco"||zone.type==="sara"||zone.type==="extchar"||zone.type==="vera"||zone.type==="loira"||zone.type==="comida"||zone.type==="bonde")&&!zoneDiaDisabled&&(()=>{
                       // Para extchar, usa os dados do personagem do dia (actionIds, falas, posição do menu)
                       const effZone = zone.type==="extchar"&&extChar
                         ? { ...zone, ...extChar, label:extChar.nome, menuSide: (extChar.x + extChar.w/2)>50?"left":undefined }
@@ -4418,6 +4473,8 @@ export default function SBTGame() {
                         : zone.type==="loira"
                         ? { ...zone, menuSide:"left" }
                         : zone.type==="comida"
+                        ? { ...zone, menuSide:"left" }
+                        : zone.type==="bonde"
                         ? { ...zone, menuSide:"left" }
                         : zone;
                       let zoneActions = cur.actions.filter(a=>
