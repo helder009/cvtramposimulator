@@ -70,21 +70,25 @@ function sfx(type, vol = 0.5) {
   try {
     _sfxCtx = _sfxCtx || new (window.AudioContext || window.webkitAudioContext)();
     const ctx = _sfxCtx, t = ctx.currentTime;
+    if (ctx.state === "suspended") { try { ctx.resume(); } catch (e) {} }
+    // Fator de volume dos SFX: mantém presença mesmo com a música baixa (piso de 0.6),
+    // e escala um pouco com o volume global. SFX devem se destacar acima da trilha.
+    const vf = 0.6 + vol * 0.8;
     const tone = (f0, f1, dur, delay = 0, wave = "square", v = 0.05) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = wave; o.frequency.setValueAtTime(f0, t + delay);
       if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t + delay + dur);
-      g.gain.setValueAtTime(v * vol, t + delay);
+      g.gain.setValueAtTime(v * vf, t + delay);
       g.gain.exponentialRampToValueAtTime(0.0001, t + delay + dur);
       o.connect(g); g.connect(ctx.destination);
       o.start(t + delay); o.stop(t + delay + dur + 0.02);
     };
-    if (type === "click")         tone(620, 620, 0.05, 0, "square", 0.035);
-    else if (type === "action")   { tone(520, 760, 0.09, 0, "square", 0.045); }
-    else if (type === "water")    { tone(320, 180, 0.12, 0, "sine", 0.07); tone(240, 150, 0.13, 0.1, "sine", 0.06); }
-    else if (type === "critical") { tone(880, 880, 0.13, 0, "sawtooth", 0.05); tone(650, 650, 0.16, 0.16, "sawtooth", 0.05); }
-    else if (type === "gameover") { tone(440, 100, 0.75, 0, "sawtooth", 0.06); }
-    else if (type === "day")      { tone(523, 523, 0.1, 0, "square", 0.05); tone(659, 659, 0.1, 0.12, "square", 0.05); tone(784, 784, 0.18, 0.24, "square", 0.05); }
+    if (type === "click")         tone(620, 620, 0.06, 0, "square", 0.12);
+    else if (type === "action")   { tone(520, 780, 0.11, 0, "square", 0.16); }
+    else if (type === "water")    { tone(320, 180, 0.14, 0, "sine", 0.24); tone(240, 150, 0.15, 0.1, "sine", 0.20); }
+    else if (type === "critical") { tone(880, 880, 0.15, 0, "sawtooth", 0.18); tone(650, 650, 0.18, 0.16, "sawtooth", 0.18); }
+    else if (type === "gameover") { tone(440, 100, 0.8, 0, "sawtooth", 0.22); }
+    else if (type === "day")      { tone(523, 523, 0.12, 0, "square", 0.18); tone(659, 659, 0.12, 0.12, "square", 0.18); tone(784, 784, 0.2, 0.24, "square", 0.18); }
   } catch (e) { /* áudio bloqueado: segue o jogo */ }
 }
 
@@ -368,7 +372,7 @@ const SCENES = {
   },
   identidade:{
     id:"identidade", name:"Identidade Visual", emoji:"🖥️",
-    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1779908844/id-visual_base_idalhb.jpg",
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1783692088/id-visual_base_2_qy6zcg.jpg",
     canDrink:true,
     npcs:[],
     hotspots:[],
@@ -561,7 +565,7 @@ const SCENES = {
         ],
       },
       { id:"zona3", label:"Cabine", emoji:"🚽", x:74.7, y:47.7, w:14.9, h:37.2, type:"action", actionIds:["pausa_estrategica","cochilo","descargas_palavroes"] },
-      { id:"zonaLoira", label:"Loira do Banheiro", emoji:"👻", x:57.9, y:45.7, w:9.6, h:26.8, type:"loira",
+      { id:"zonaLoira", label:"Loira do Banheiro", emoji:"👻", x:57.9, y:45.7, w:10.3, h:44.5, type:"loira",
         img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1783122991/ban_fantasma_nsko9q.png",
         actionIds:["pedir_loira"],
         falas:[
@@ -594,7 +598,13 @@ const SCENES = {
         ],
       },
       { id:"zona4", label:"Micro-ondas", emoji:"🔥", x:77, y:55, w:21, h:13.7, type:"action", actionIds:["esquentar_marmita"] },
-      { id:"zona5", label:"Thutti", emoji:"🎲", x:66.9, y:66.5, w:9, h:24.6, type:"action", actionIds:["jogar_thutti"] },
+      { id:"zona5", label:"Thutti", emoji:"🎲", x:66.9, y:66.5, w:9, h:24.6, type:"action+fala", actionIds:["jogar_thutti"],
+        falas:[
+          { text:"E aí man, bora alugar um jogo pro final de semana?", minDay:1 },
+          { text:"Dá tempo de jogar uma partidinha depois do almoço?", minDay:1 },
+          { text:"Manja jogar 21? Tenho um aqui muito bom, é tipo 21, mas com uma mecânica de dados.", minDay:1 },
+        ],
+      },
     ],
     actions:[
       {id:"comer_calango",     label:"Arriscar o Calango 🎲", emoji:"🦎", time:4, special:"calango_risk", effects:{}, availFrom:"11:30", msg:"Você encheu a bandeja com coragem..."},
@@ -2747,7 +2757,12 @@ function FutebolCriacaoVisual({ playerName = "Você", playerTeam = null, onClose
         <div className="pg-overlay">
           <div className="pg-card">
             <h3>⚽ FUTEBOL DA CRIAÇÃO VISUAL</h3>
-            <p className="pg-rules">Escolha seu time para o duelo.<br /><b>Vence quem fizer {WIN_SCORE} gols primeiro!</b></p>
+            <p className="pg-rules">
+              Vence quem fizer <b>{WIN_SCORE} gols</b> primeiro!<br />
+              🏆 Se ganhar: <b>avança para o dia seguinte de expediente.</b><br />
+              💀 Se perder: <b>FIM DE JOGO!</b>
+            </p>
+            <p className="pg-rules" style={{marginTop:6,opacity:.85}}>Escolha seu time para o duelo.</p>
             <div className="pg-pick">
               <button className="pg-pick-team" onClick={() => { setMyTeam("star"); setPhase("ready"); }}>
                 <Crest team="star" size={92} /><b>STAR WARZEA</b>
@@ -2769,8 +2784,7 @@ function FutebolCriacaoVisual({ playerName = "Você", playerTeam = null, onClose
               <span className="pg-vs-x">×</span>
               <div className="pg-vs-team"><Crest team={foe.id} size={84} /><b>{foe.name}</b><small>CPU</small></div>
             </div>
-            <p className="pg-rules">Rebata a bola e faça o adversário passar do seu gol.<br />
-              <b>🖱️ Mexa o mouse (ou use ← →) para mover seu jogador.</b></p>
+            <p className="pg-rules"><b>🖱️ Mexa o mouse (ou use ← →) para mover seu jogador.</b></p>
             <button className="pg-btn gold big" onClick={startGame}>▶ COMEÇAR PARTIDA</button>
           </div>
         </div>
@@ -3084,6 +3098,8 @@ export default function SBTGame() {
     if(id==="jogar_futebol" && (!quadraReservada || futebolUsado)) return true;  // só após reservar, some após jogar
     // Cadeia da Loira: uma vez que a ajuda foi usada (1x no jogo), toda a cadeia desativa
     if((id==="descargas_palavroes"||id==="chamar_loira") && usedOnce["pedir_loira"]) return true;
+    // Dar as 3 descargas some assim que a Loira é invocada (persiste em dias novos)
+    if(id==="descargas_palavroes" && loiraChamada) return true;
     // Chamar a Loira: só após dar as 3 descargas, e some depois que ela já foi chamada
     if(id==="chamar_loira" && (!descargasFeitas || loiraChamada)) return true;
     return (usageCounts[id]||0) >= limit;
@@ -3811,19 +3827,6 @@ export default function SBTGame() {
         @keyframes clockpulse{0%{transform:scale(1);color:#e8c840}40%{transform:scale(1.3);color:#fff}100%{transform:scale(1)}}
       `}</style>
 
-      {/* TRANSIÇÃO DE DIA — "DIA X" */}
-      {dayIntro&&(
-        <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:960,display:"flex",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,.75))",animation:"dayintro 2s ease forwards"}}>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:12,letterSpacing:8,color:"#8888aa",fontFamily:"monospace",marginBottom:6}}>EXPEDIENTE</div>
-            <div style={{fontSize:72,fontWeight:900,fontFamily:"'Arial Black',Arial,sans-serif",color:"#e8c840",letterSpacing:4,textShadow:"0 0 40px rgba(232,200,64,.5), 0 4px 0 #7a6410"}}>
-              DIA {dayIntro}
-            </div>
-            <div style={{fontSize:11,color:"#666",fontFamily:"monospace",marginTop:8}}>Bata o ponto e sobreviva.</div>
-          </div>
-        </div>
-      )}
-
       {/* VINHETA DE PERIGO — bordas vermelhas pulsando quando alguma barra está crítica */}
       {(stats.criar<=DANGER||stats.socializar<=DANGER||stats.mexer<=DANGER||agua<=DANGER)&&(
         <div style={{
@@ -3853,6 +3856,12 @@ export default function SBTGame() {
               </>}
               {critModal.type==="set_stat"&&critModal.stat==="socializar"&&<>
                 💬 <strong>Socialização</strong> foi para {critModal.value}%
+              </>}
+              {critModal.type==="set_stat"&&critModal.stat==="criar"&&<>
+                🎨 <strong>Criatividade</strong> foi para {critModal.value}%
+              </>}
+              {critModal.type==="set_stat"&&critModal.stat==="mexer"&&<>
+                🏃 <strong>Movimentação</strong> foi para {critModal.value}%
               </>}
             </div>
             <button onClick={()=>setCritModal(null)} style={{background:"#ff4444",color:"#fff",border:"none",padding:"9px 26px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:"bold",letterSpacing:1}}>ENTENDIDO</button>
@@ -4075,6 +4084,19 @@ export default function SBTGame() {
                   </div>
               }
 
+              {/* TRANSIÇÃO DE DIA — "DIA X" centralizada na área do cenário */}
+              {dayIntro&&(
+                <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:60,display:"flex",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,.78))",animation:"dayintro 2s ease forwards"}}>
+                  <div style={{textAlign:"center"}}>
+                    <div style={{fontSize:11,letterSpacing:7,color:"#8888aa",fontFamily:"monospace",marginBottom:5}}>EXPEDIENTE</div>
+                    <div style={{fontSize:58,fontWeight:900,fontFamily:"'Arial Black',Arial,sans-serif",color:"#e8c840",letterSpacing:3,textShadow:"0 0 32px rgba(232,200,64,.5), 0 3px 0 #7a6410"}}>
+                      DIA {dayIntro}
+                    </div>
+                    <div style={{fontSize:10,color:"#888",fontFamily:"monospace",marginTop:7}}>Bata o ponto e sobreviva.</div>
+                  </div>
+                </div>
+              )}
+
               {/* Hotspots descritivos */}
               {!isClickScene && (cur.hotspots||[]).map(h=>(
                 <button key={h.id} onClick={e=>{e.stopPropagation();setHotspot(hotspot?.id===h.id?null:h);setNpcMsg(null);}}
@@ -4202,6 +4224,29 @@ export default function SBTGame() {
                   }
                   // Zona de ação ou action+fala ou action+dia — toggle menu
                   if(zone.type==="action+dia" && zoneDiaDisabled){ setZonaMsg({text:"⛔ Fechado a partir do 3º dia.", zona:zone.id}); return; }
+                  // action+fala: se nenhuma ação da zona está disponível agora, comporta como fala pura
+                  if(zone.type==="action+fala" && zone.falas){
+                    const availAct = (zone.actionIds||[]).some(aid=>{
+                      const act = (cur.actions||[]).find(a=>a.id===aid);
+                      if(!act) return false;
+                      if(act.availDay && currentDay < act.availDay) return false;
+                      if(act.special==="voltinha_pos" && !calangoPassed) return false;
+                      if(act.special==="thutti" && !calangoPassed) return false;
+                      if(act.special==="chamar_loira" && (!descargasFeitas || loiraChamada)) return false;
+                      if(act.special==="futebol" && (!quadraReservada || futebolUsado)) return false;
+                      if(act.special==="reservar_quadra" && (quadraReservada || futebolUsado)) return false;
+                      return !isExhausted(aid);
+                    });
+                    if(!availAct){
+                      const dispFalas = zone.falas.filter(f=>currentDay>=f.minDay && f.actionId===undefined);
+                      if(dispFalas.length>0){
+                        const f = dispFalas[Math.floor(Math.random()*dispFalas.length)];
+                        setZonaMsg({text:`${zone.emoji} "${f.text}"`, zona:zone.id});
+                      }
+                      setOpenZone(null);
+                      return;
+                    }
+                  }
                   if(isOpen){ setOpenZone(null); setZonaMsg(null); }
                   else { setOpenZone(zone); setZonaMsg(null); }
                 };
@@ -4381,6 +4426,7 @@ export default function SBTGame() {
                         !(a.special==="voltinha_pos" && !calangoPassed) &&    // oculta voltinha pós-calango até passar no teste
                         !(a.special==="thutti" && !calangoPassed) &&          // oculta Thutti até passar no Calango
                         !(a.special==="chamar_loira" && (!descargasFeitas || loiraChamada)) && // Loira: só após as descargas, some depois de chamada
+                        !(a.special==="descargas" && (loiraChamada || usedOnce["pedir_loira"])) && // Descargas: some após invocar a Loira (persiste em dias novos)
                         !(a.special==="reservar_quadra" && (quadraReservada || futebolUsado)) && // Reservar: some após reservar/jogar
                         !(a.special==="futebol" && (!quadraReservada || futebolUsado))       // Futebol: só após reservar, some após jogar
                       );
@@ -4400,6 +4446,8 @@ export default function SBTGame() {
                             : a
                         );
                       }
+                      // Se não sobrou nenhuma ação disponível, não renderiza menu vazio.
+                      if(zoneActions.length===0) return null;
                       // Se action+fala, coco, sara ou extchar: ao clicar numa ação mostra uma fala aleatória também
                       const onZoneAction = (a) => {
                         if((zone.type==="action+fala"||zone.type==="coco"||zone.type==="sara"||zone.type==="extchar"||zone.type==="vera"||zone.type==="loira")&&effZone.falas){
