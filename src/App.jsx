@@ -131,6 +131,7 @@ const ACTION_LIMITS = {
   padoca_dia:1, biblio_samples:4,
   trocar_ideia:6, papo_kell:2, meme_jess:2,
   janela_cor:1,
+  encher_bonde:1,
   fumar:6,
   lavar_rosto:10,
   sentar_mureta:2,
@@ -2990,8 +2991,8 @@ export default function SBTGame() {
     setDayIntro(currentDay);
     // Comida do dia na ID Visual: sempre há uma, sorteada aleatoriamente (pode repetir)
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
-    // Bonde da Água no Corredor: 33% de chance/dia a partir do dia 2 (some de vez após usar a ação)
-    setBondeVisible(currentDay >= 2 && !usedOnce["encher_bonde"] && Math.random() < 0.40);
+    // Bonde da Água no Corredor: 40% de chance/dia a partir do dia 2 (some ao usar, mas pode voltar em outro dia)
+    setBondeVisible(currentDay >= 2 && Math.random() < 0.40);
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
@@ -3243,8 +3244,7 @@ export default function SBTGame() {
     if(a.special==="encher"){ setGarrafa(100); applyFx(a.effects); drainHydIfNeeded(a.id); incUsage(a.id); addLog(`[${lbl}] 🫙 Garrafa enchida! ${a.msg} (15min)`); advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null); return; }
     if(a.special==="encher_bonde"){
       setGarrafa(100); applyFx(a.effects); incUsage(a.id);
-      setUsedOnce(prev=>({...prev,[a.id]:true}));
-      setBondeVisible(false);
+      setBondeVisible(false);   // some naquele dia (mas pode reaparecer em outro dia)
       if(musicOn) sfx("action", volume);
       addLog(`[${lbl}] 💦 ${a.msg} (15min)`);
       advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null);
