@@ -408,7 +408,7 @@ const SCENES = {
       },
       {
         id:"zona4", label:"Robô", emoji:"🤖",
-        x:71.5, y:46.3, w:6.4, h:14,
+        x:72.9, y:46.3, w:6.4, h:14,
         type:"fala",
         falas:[
           { text:"Instalou seus plugins BRP?", minDay:1 },
@@ -2991,7 +2991,7 @@ export default function SBTGame() {
     // Comida do dia na ID Visual: sempre há uma, sorteada aleatoriamente (pode repetir)
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
     // Bonde da Água no Corredor: 33% de chance/dia a partir do dia 2 (some de vez após usar a ação)
-    setBondeVisible(currentDay >= 2 && !usedOnce["encher_bonde"] && Math.random() < 0.33);
+    setBondeVisible(currentDay >= 2 && !usedOnce["encher_bonde"] && Math.random() < 0.40);
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
@@ -3557,10 +3557,29 @@ export default function SBTGame() {
   // Continua para o próximo dia sem resetar tudo
   const nextDay = () => {
     const newDays = days + 1;
+    const diaAtual = newDays + 1; // dia que está iniciando (1-based)
     setDays(newDays);
     setTurn(0); setScene("praca");
-    setStats(getInitialStats(newDays));
-    setAgua(70); setGarrafa(100);
+
+    // Bônus financeiros: VR a cada 10 dias, pagamento a cada 15 dias (aplicados às barras iniciais)
+    const vrDia  = diaAtual % 10 === 0;   // dias 10, 20, 30...
+    const pagDia = diaAtual % 15 === 0;   // dias 15, 30...
+    const ini = getInitialStats(newDays);
+    let bônusStats = { ...ini };
+    let bônusAgua = 70;
+    if(vrDia){  // VR: +15% hidratação e socialização
+      bônusStats.socializar = clamp(bônusStats.socializar + 15);
+      bônusAgua = clamp(bônusAgua + 15);
+    }
+    if(pagDia){ // Pagamento: +25% em todas as barras
+      bônusStats.criar      = clamp(bônusStats.criar + 25);
+      bônusStats.socializar = clamp(bônusStats.socializar + 25);
+      bônusStats.mexer      = clamp(bônusStats.mexer + 25);
+      bônusAgua = clamp(bônusAgua + 25);
+    }
+    setStats(bônusStats);
+    setAgua(bônusAgua); setGarrafa(100);
+
     setLog([]); setUsageCounts({}); setWaterClicks(0);
     setCalangoPassed(false); setWarned({}); setLocks({});
     setCritModal(null); setOpenZone(null); setHotspot(null); setNpcMsg(null);
@@ -3568,8 +3587,16 @@ export default function SBTGame() {
     setZonaMsg(null); setThuttiGame(null); setMusicTrack(MUSIC_MAIN);
     setDescargasFeitas(false);
     setPhase("game");
-    // Liberação progressiva de ambientes (newDays = expedientes completos; dia que inicia = newDays+1)
-    const diaAtual = newDays + 1;
+
+    // Mensagens de VR e pagamento no log (começo do dia)
+    if(vrDia && pagDia){
+      addLog(`💰💳 Dia de sorte! O VR (vale-refeição) E o pagamento caíram na conta. Fim de mês recompensador!`, "info");
+    } else if(pagDia){
+      addLog(`💰 O pagamento caiu na conta! Fôlego novo pra encarar o expediente.`, "info");
+    } else if(vrDia){
+      addLog(`💳 O VR (vale-refeição) caiu! Dá pra comer melhor e sair com a galera.`, "info");
+    }
+
     if(diaAtual === 2){
       setInfoModal({
         emoji:"🎥",
