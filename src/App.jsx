@@ -3194,8 +3194,8 @@ export default function SBTGame() {
       setFamosoAtual(null);
     }
     setFamosoUsado(false);
-    // Coco Mágico no Jornalismo: 25% base, escasseia com os dias
-    setCocoVisible(Math.random() < escassez(0.25));
+    // Coco Mágico no Jornalismo: 50% base, escasseia com os dias
+    setCocoVisible(Math.random() < escassez(0.50));
     // SARA no CVT: 50% base, escasseia com os dias
     setSaraVisible(Math.random() < escassez(0.50));
     // Vera Verão no Estúdio: 25% base a partir do dia 5, escasseia com os dias
@@ -3213,8 +3213,8 @@ export default function SBTGame() {
     setDayIntro(currentDay);
     // Comida do dia na ID Visual: sempre há uma (não escasseia — pode ser boa ou ruim)
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
-    // Bonde da Água no Corredor: 40% base a partir do dia 2, escasseia com os dias
-    setBondeVisible(currentDay >= 2 && Math.random() < escassez(0.40));
+    // Bonde da Água no Corredor: 50% base a partir do dia 2, escasseia com os dias
+    setBondeVisible(currentDay >= 2 && Math.random() < escassez(0.50));
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
