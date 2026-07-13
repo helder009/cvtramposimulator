@@ -3139,6 +3139,7 @@ export default function SBTGame() {
   const [bondeVisible, setBondeVisible] = useState(false);  // Bonde da Água no Corredor hoje
   const [labOpen, setLabOpen]           = useState(false);  // minigame do Labirinto aberto
   const [labUsadoHoje, setLabUsadoHoje] = useState(false);  // labirinto já disparou hoje (1x/dia)
+  const [labirintoHoje, setLabirintoHoje] = useState(false);// sorteado no início do dia: hoje vai ter labirinto?
   const [quadraReservada, setQuadraReservada] = useState(false); // reservou a quadra com o Hélder
   const [futebolUsado, setFutebolUsado] = useState(false);  // dinâmica do futebol já usada (1x no jogo, não reseta)
   const [futebolOpen, setFutebolOpen]   = useState(false);  // minigame de futebol aberto
@@ -3180,11 +3181,11 @@ export default function SBTGame() {
     // ── ESCASSEZ PROGRESSIVA ──────────────────────────────────────────────────
     // Eventos "salvadores" (SARA, Coco, Famoso, Vera, Bonde, personagens externos)
     // ficam mais raros conforme os dias passam. A partir do dia 6, a chance cai
-    // 6% ao dia (multiplicativo), com piso de 50% da chance original — assim nunca
+    // 3% ao dia (multiplicativo), com piso de 50% da chance original — assim nunca
     // somem de vez, mas deixam de ser socorro garantido nos dias avançados.
     const escassez = (chanceBase) => {
       if(currentDay <= 5) return chanceBase;
-      const fator = Math.max(0.50, 1 - (currentDay - 5) * 0.06);
+      const fator = Math.max(0.50, 1 - (currentDay - 5) * 0.03);
       return chanceBase * fator;
     };
 
@@ -3215,6 +3216,9 @@ export default function SBTGame() {
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
     // Bonde da Água no Corredor: 50% base a partir do dia 2, escasseia com os dias
     setBondeVisible(currentDay >= 2 && Math.random() < escassez(0.50));
+    // Labirinto do SBT: sorteia UMA VEZ por dia (30% a partir do dia 4).
+    // Se sorteado, dispara na primeira ação feita no corredor naquele dia.
+    setLabirintoHoje(currentDay >= 4 && Math.random() < 0.30);
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
@@ -3658,17 +3662,15 @@ export default function SBTGame() {
   };
 
   // ── LABIRINTO DO SBT — gatilho no Corredor ────────────────────────────────────
-  // A partir do dia 4, 30% de chance por dia (1x/dia) ao agir no corredor.
+  // O sorteio (30%, dia 4+) acontece UMA VEZ no início do dia. Se sorteado,
+  // o labirinto dispara na primeira ação executada no corredor naquele dia.
   const maybeLabirinto = (sceneId) => {
     if(sceneId!=="corredor") return;
-    const currentDay = days + 1;
-    if(currentDay < 4 || labUsadoHoje || labOpen) return;
-    if(Math.random() < 0.30){
-      setLabUsadoHoje(true);
-      setLabOpen(true);
-      if(musicOn) sfx("critical", volume);
-      addLog(`🚪 Você virou numa esquina errada e se perdeu nos corredores do SBT!`, "critical");
-    }
+    if(!labirintoHoje || labUsadoHoje || labOpen) return;
+    setLabUsadoHoje(true);
+    setLabOpen(true);
+    if(musicOn) sfx("critical", volume);
+    addLog(`🚪 Você virou numa esquina errada e se perdeu nos corredores do SBT!`, "critical");
   };
 
   // ── MINIGAME DO THUTTI — "21 do Thutti" (cartas + dado de risco) ──────────────
@@ -3814,7 +3816,7 @@ export default function SBTGame() {
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
     setLocks({});setCritModal(null);setInfoModal(null);setOpenZone(null);setUsageCounts({});
-    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);setThuttiGame(null);setMusicTrack(MUSIC_MAIN);setUsedOnce({});setExtChar(null);setLastExtChar(null);setVeraVisible(false);setRodaOpen(false);setDescargasFeitas(false);setLoiraChamada(false);setComidaHoje(null);setQuadraReservada(false);setFutebolUsado(false);setFutebolOpen(false);setBondeVisible(false);setLabOpen(false);setLabUsadoHoje(false);
+    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);setThuttiGame(null);setMusicTrack(MUSIC_MAIN);setUsedOnce({});setExtChar(null);setLastExtChar(null);setVeraVisible(false);setRodaOpen(false);setDescargasFeitas(false);setLoiraChamada(false);setComidaHoje(null);setQuadraReservada(false);setFutebolUsado(false);setFutebolOpen(false);setBondeVisible(false);setLabOpen(false);setLabUsadoHoje(false);setLabirintoHoje(false);
   };
 
   // Continua para o próximo dia sem resetar tudo
@@ -3905,7 +3907,7 @@ export default function SBTGame() {
     setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
     setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
     setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
-    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false); setThuttiGame(null); setMusicTrack(MUSIC_MAIN); setUsedOnce({}); setExtChar(null); setLastExtChar(null); setVeraVisible(false); setRodaOpen(false); setDescargasFeitas(false); setLoiraChamada(false); setComidaHoje(null); setQuadraReservada(false); setFutebolUsado(false); setFutebolOpen(false); setBondeVisible(false); setLabOpen(false); setLabUsadoHoje(false);
+    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false); setThuttiGame(null); setMusicTrack(MUSIC_MAIN); setUsedOnce({}); setExtChar(null); setLastExtChar(null); setVeraVisible(false); setRodaOpen(false); setDescargasFeitas(false); setLoiraChamada(false); setComidaHoje(null); setQuadraReservada(false); setFutebolUsado(false); setFutebolOpen(false); setBondeVisible(false); setLabOpen(false); setLabUsadoHoje(false); setLabirintoHoje(false);
     // Configura o novo jogo
     setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
     setPhase("game");
