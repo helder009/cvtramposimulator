@@ -2197,6 +2197,213 @@ const RR_CSS = `
 }
 `;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   🚪 LABIRINTO DO SBT — minigame de memória nos corredores
+   Mostra a sequência de portas certas, o jogador repete em 5 telas.
+   ═══════════════════════════════════════════════════════════════════════ */
+const LAB_FASES = 5;      // telas até escapar
+const LAB_PORTAS = 4;     // portas por tela
+
+// Placas/dicas de cada andar do labirinto (sabor visual)
+const LAB_PLACAS = [
+  "ALA A — SALAS 201-208",
+  "ALA B — ESTÚDIOS",
+  "ALA C — ADMINISTRATIVO",
+  "ALA D — TÉCNICA",
+  "SAÍDA ↑ — CRIAÇÃO VISUAL",
+];
+
+function LabirintoSBT({ onEscape, onFail }) {
+  // sequência correta: uma porta certa por fase
+  const [seq] = useState(() =>
+    Array.from({ length: LAB_FASES }, () => Math.floor(Math.random() * LAB_PORTAS))
+  );
+  const [fase, setFase] = useState(0);          // fase atual (0..4)
+  const [modo, setModo] = useState("intro");    // intro | mostrando | jogando | erro | fim
+  const [mostraIdx, setMostraIdx] = useState(0);// qual passo da sequência está piscando
+  const [piscaOn, setPiscaOn] = useState(false);// porta acesa (true) ou intervalo apagado (false)
+  const [erros, setErros] = useState(0);
+  const [feedback, setFeedback] = useState(null); // {porta, ok}
+
+  // Fase de memorização: pisca a sequência inteira, uma porta por vez,
+  // com intervalo apagado entre as piscadas (assim portas repetidas ficam claras)
+  useEffect(() => {
+    if (modo !== "mostrando") return;
+    if (mostraIdx >= LAB_FASES) {
+      const t = setTimeout(() => { setModo("jogando"); setMostraIdx(0); setPiscaOn(false); }, 600);
+      return () => clearTimeout(t);
+    }
+    if (!piscaOn) {
+      // intervalo apagado → acende a porta atual
+      const t = setTimeout(() => setPiscaOn(true), 320);
+      return () => clearTimeout(t);
+    }
+    // porta acesa → apaga e avança para a próxima
+    const t = setTimeout(() => { setPiscaOn(false); setMostraIdx(i => i + 1); }, 700);
+    return () => clearTimeout(t);
+  }, [modo, mostraIdx, piscaOn]);
+
+  const escolher = (porta) => {
+    if (modo !== "jogando" || feedback) return;
+    const certa = seq[fase] === porta;
+    setFeedback({ porta, ok: certa });
+    setTimeout(() => {
+      setFeedback(null);
+      if (certa) {
+        if (fase + 1 >= LAB_FASES) { setModo("fim"); }
+        else setFase(f => f + 1);
+      } else {
+        // errou: volta pro começo do labirinto e conta o erro
+        setErros(e => e + 1);
+        setFase(0);
+        setModo("erro");
+        setTimeout(() => setModo("jogando"), 1200);
+      }
+    }, 650);
+  };
+
+  const cores = ["#1e3a8a", "#1e40af", "#1d4ed8", "#2563eb"]; // tons de porta azul
+
+  return (
+    <div style={{
+      position:"absolute", top:"10%", left:"10%", width:"80%", height:"80%", zIndex:998,
+      background:"linear-gradient(180deg,#7fe3e8 0%,#5fd0d8 55%,#9fdde0 55%,#bfe9ec 100%)",
+      borderRadius:14, border:"3px solid #1a6b78",
+      boxShadow:"0 20px 70px rgba(0,0,0,.6)",
+      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+      fontFamily:"monospace", padding:30, boxSizing:"border-box", overflow:"hidden",
+    }}>
+      {/* teto escuro (estética do corredor) */}
+      <div style={{position:"absolute",top:0,left:0,right:0,height:"22%",background:"#123",opacity:.9,borderRadius:"11px 11px 0 0"}}/>
+      {/* faixa de rodapé do corredor */}
+      <div style={{position:"absolute",bottom:0,left:0,right:0,height:"6%",background:"#7fb6bd",opacity:.5,borderRadius:"0 0 11px 11px"}}/>
+
+      {/* HUD */}
+      <div style={{position:"absolute",top:14,left:20,right:20,display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:5}}>
+        <div style={{background:"#0d3b45",color:"#a8f0f5",padding:"5px 12px",borderRadius:6,fontSize:11,fontWeight:"bold",letterSpacing:1,border:"2px solid #1a6b78"}}>
+          🚪 PERDIDO NOS CORREDORES
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          {Array.from({length:LAB_FASES}).map((_,i)=>(
+            <div key={i} style={{
+              width:12,height:12,borderRadius:3,
+              background: i < fase ? "#22c55e" : i===fase && modo==="jogando" ? "#e8c840" : "#0d3b4577",
+              border:"1px solid #0d3b45",
+            }}/>
+          ))}
+          {erros>0&&<div style={{color:"#b91c1c",fontSize:11,fontWeight:"bold",marginLeft:6}}>❌ {erros}</div>}
+        </div>
+      </div>
+
+      {/* INTRO */}
+      {modo==="intro"&&(
+        <div style={{background:"#0d3b45ee",border:"3px solid #1a6b78",borderRadius:14,padding:"26px 30px",maxWidth:420,textAlign:"center",color:"#d6f7fa",boxShadow:"0 16px 50px rgba(0,0,0,.4)"}}>
+          <div style={{fontSize:44,marginBottom:8}}>🚪</div>
+          <h3 style={{margin:"0 0 10px",fontSize:18,color:"#a8f0f5",letterSpacing:1}}>VOCÊ SE PERDEU!</h3>
+          <p style={{fontSize:12,lineHeight:1.6,margin:"0 0 14px"}}>
+            Os corredores do SBT são um labirinto. Você virou numa esquina errada e agora não sabe voltar.
+          </p>
+          <p style={{fontSize:12,lineHeight:1.6,margin:"0 0 16px",color:"#e8c840"}}>
+            <b>Memorize o caminho!</b><br/>
+            As portas certas vão piscar em verde, uma por vez.<br/>
+            Depois, refaça o trajeto pelas <b>{LAB_FASES} alas</b>.<br/>
+            <span style={{color:"#ff9a9a"}}>Cada porta errada te desgasta (−5% criatividade).</span>
+          </p>
+          <button onClick={()=>setModo("mostrando")} style={{
+            background:"linear-gradient(180deg,#ffe28a,#e8c840)",border:"2px solid #a8861a",color:"#1a1004",
+            borderRadius:10,padding:"11px 26px",fontSize:13,fontWeight:"bold",fontFamily:"monospace",
+            letterSpacing:1,cursor:"pointer",boxShadow:"0 4px 14px rgba(0,0,0,.3)",
+          }}>MEMORIZAR O CAMINHO</button>
+        </div>
+      )}
+
+      {/* JOGO: portas */}
+      {(modo==="mostrando"||modo==="jogando"||modo==="erro")&&(
+        <>
+          {/* placa da ala atual */}
+          <div style={{
+            background:"#0d3b45",color:"#a8f0f5",padding:"6px 18px",borderRadius:5,
+            fontSize:12,fontWeight:"bold",letterSpacing:2,marginBottom:18,
+            border:"2px solid #1a6b78",zIndex:5,
+          }}>
+            {modo==="mostrando" ? "🧠 MEMORIZE..." : LAB_PLACAS[fase]}
+          </div>
+
+          {/* fileira de portas */}
+          <div style={{display:"flex",gap:18,zIndex:5}}>
+            {Array.from({length:LAB_PORTAS}).map((_,p)=>{
+              const piscando = modo==="mostrando" && piscaOn && mostraIdx<LAB_FASES && seq[mostraIdx]===p;
+              const fb = feedback && feedback.porta===p;
+              const bg = piscando ? "#22c55e"
+                : fb ? (feedback.ok ? "#22c55e" : "#dc2626")
+                : cores[p];
+              return (
+                <div key={p}
+                  onClick={()=>escolher(p)}
+                  style={{
+                    width:110,height:205,borderRadius:"6px 6px 0 0",
+                    background:bg,
+                    border:"3px solid #0f2a5a", borderBottom:"none",
+                    cursor: modo==="jogando"&&!feedback ? "pointer" : "default",
+                    position:"relative",
+                    transition:"background .18s, transform .12s",
+                    transform: piscando||fb ? "translateY(-8px) scale(1.05)" : "none",
+                    boxShadow: piscando||fb ? "0 0 32px rgba(255,255,255,.6)" : "0 8px 18px rgba(0,0,0,.3)",
+                  }}
+                  onMouseEnter={e=>{ if(modo==="jogando"&&!feedback) e.currentTarget.style.transform="translateY(-3px)"; }}
+                  onMouseLeave={e=>{ if(!piscando&&!fb) e.currentTarget.style.transform="none"; }}
+                >
+                  {/* placa da porta */}
+                  <div style={{
+                    position:"absolute",top:22,left:"50%",transform:"translateX(-50%)",
+                    width:58,height:24,background:"#0f2a5a",borderRadius:3,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:12,color:"#9fd8ff",fontWeight:"bold",
+                  }}>{String.fromCharCode(65+p)}</div>
+                  {/* maçaneta */}
+                  <div style={{
+                    position:"absolute",right:12,top:"52%",width:12,height:12,borderRadius:"50%",
+                    background:"#cbd5e1",boxShadow:"0 1px 3px rgba(0,0,0,.4)",
+                  }}/>
+                  {/* frestas de luz embaixo */}
+                  <div style={{position:"absolute",bottom:0,left:8,right:8,height:4,background:"rgba(255,255,220,.35)"}}/>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* status embaixo */}
+          <div style={{marginTop:22,fontSize:12,color:"#0d3b45",fontWeight:"bold",letterSpacing:1,zIndex:5,minHeight:20}}>
+            {modo==="mostrando" && `Memorizando ala ${Math.min(mostraIdx+1,LAB_FASES)} de ${LAB_FASES}${piscaOn?"..":""}`}
+            {modo==="jogando" && !feedback && `Qual porta leva à ${LAB_PLACAS[fase].includes("SAÍDA")?"saída":"próxima ala"}?`}
+            {modo==="jogando" && feedback && (feedback.ok ? "✅ Por aqui!" : "")}
+            {modo==="erro" && "❌ Porta errada! Você voltou ao início do labirinto."}
+          </div>
+        </>
+      )}
+
+      {/* FIM — escapou */}
+      {modo==="fim"&&(
+        <div style={{background:"#0d3b45ee",border:"3px solid #22c55e",borderRadius:14,padding:"26px 30px",maxWidth:400,textAlign:"center",color:"#d6f7fa",boxShadow:"0 0 60px rgba(34,197,94,.3)"}}>
+          <div style={{fontSize:46,marginBottom:8}}>🎉</div>
+          <h3 style={{margin:"0 0 8px",fontSize:19,color:"#4ade80",letterSpacing:1}}>VOCÊ ESCAPOU!</h3>
+          <p style={{fontSize:12,lineHeight:1.6,margin:"0 0 6px"}}>
+            Depois de caminhar meio SBT, você achou o caminho de volta pra Criação Visual.
+          </p>
+          <p style={{fontSize:12,margin:"0 0 16px",color:"#a8f0f5"}}>
+            {erros===0 ? "Sem errar nenhuma porta! Memória de elefante." : `Você errou ${erros} porta${erros>1?"s":""} pelo caminho.`}
+          </p>
+          <button onClick={()=>onEscape(erros)} style={{
+            background:"linear-gradient(180deg,#4ade80,#22c55e)",border:"2px solid #15803d",color:"#052e16",
+            borderRadius:10,padding:"11px 26px",fontSize:13,fontWeight:"bold",fontFamily:"monospace",
+            letterSpacing:1,cursor:"pointer",boxShadow:"0 4px 14px rgba(0,0,0,.3)",
+          }}>VOLTAR AO CORREDOR</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -2930,6 +3137,8 @@ export default function SBTGame() {
   const [dayIntro, setDayIntro]         = useState(null);   // overlay "DIA X" na transição de dia
   const [comidaHoje, setComidaHoje]     = useState(null);   // comida do dia na ID Visual
   const [bondeVisible, setBondeVisible] = useState(false);  // Bonde da Água no Corredor hoje
+  const [labOpen, setLabOpen]           = useState(false);  // minigame do Labirinto aberto
+  const [labUsadoHoje, setLabUsadoHoje] = useState(false);  // labirinto já disparou hoje (1x/dia)
   const [quadraReservada, setQuadraReservada] = useState(false); // reservou a quadra com o Hélder
   const [futebolUsado, setFutebolUsado] = useState(false);  // dinâmica do futebol já usada (1x no jogo, não reseta)
   const [futebolOpen, setFutebolOpen]   = useState(false);  // minigame de futebol aberto
@@ -3261,13 +3470,13 @@ export default function SBTGame() {
     }
 
     // Encher garrafa
-    if(a.special==="encher"){ setGarrafa(100); applyFx(a.effects); drainHydIfNeeded(a.id); incUsage(a.id); addLog(`[${lbl}] 🫙 Garrafa enchida! ${a.msg} (15min)`); advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null); return; }
+    if(a.special==="encher"){ setGarrafa(100); applyFx(a.effects); drainHydIfNeeded(a.id); incUsage(a.id); addLog(`[${lbl}] 🫙 Garrafa enchida! ${a.msg} (15min)`); advanceTurns(a.time); maybeCritical(scene); maybeLabirinto(scene); setOpenZone(null); setHotspot(null); return; }
     if(a.special==="encher_bonde"){
       setGarrafa(100); applyFx(a.effects); incUsage(a.id);
       setBondeVisible(false);   // some naquele dia (mas pode reaparecer em outro dia)
       if(musicOn) sfx("action", volume);
       addLog(`[${lbl}] 💦 ${a.msg} (15min)`);
-      advanceTurns(a.time); maybeCritical(scene); setOpenZone(null); setHotspot(null);
+      advanceTurns(a.time); maybeCritical(scene); maybeLabirinto(scene); setOpenZone(null); setHotspot(null);
       return;
     }
 
@@ -3444,7 +3653,22 @@ export default function SBTGame() {
 
     if(a.time>0){ advanceTurns(a.time); maybeCritical(scene); }
     else if(scene==="banheiro"){ maybeCritical(scene); }   // banheiro: até ações instantâneas podem revelar o fedor
+    maybeLabirinto(scene);   // corredor: chance de se perder nos corredores
     setOpenZone(null); setHotspot(null);
+  };
+
+  // ── LABIRINTO DO SBT — gatilho no Corredor ────────────────────────────────────
+  // A partir do dia 4, 30% de chance por dia (1x/dia) ao agir no corredor.
+  const maybeLabirinto = (sceneId) => {
+    if(sceneId!=="corredor") return;
+    const currentDay = days + 1;
+    if(currentDay < 4 || labUsadoHoje || labOpen) return;
+    if(Math.random() < 0.30){
+      setLabUsadoHoje(true);
+      setLabOpen(true);
+      if(musicOn) sfx("critical", volume);
+      addLog(`🚪 Você virou numa esquina errada e se perdeu nos corredores do SBT!`, "critical");
+    }
   };
 
   // ── MINIGAME DO THUTTI — "21 do Thutti" (cartas + dado de risco) ──────────────
@@ -3547,6 +3771,24 @@ export default function SBTGame() {
     setMusicTrack(MUSIC_MAIN);
   };
 
+  // ── LABIRINTO DO SBT — saída do minigame ──────────────────────────────────────
+  // Escapar dá bônus de mobilidade (andou meio SBT). Cada porta errada custa
+  // 5% de criatividade (o desgaste de se perder). Sem perda de turnos.
+  const labEscape = (erros) => {
+    setLabOpen(false);
+    const lbl = turnLabels[Math.min(turn,TOTAL_TURNS-1)];
+    const desgaste = erros * 5;                   // -5% criatividade por erro
+    // Bônus por escapar: andou muito pelos corredores
+    applyFx({ mexer:+40, socializar:+10, criar: -desgaste });
+    if(erros>0){
+      addLog(`[${lbl}] 🚪 Escapou do labirinto, mas errou ${erros} porta${erros>1?"s":""}: −${desgaste}% criatividade. +40% movimentação.`, "warn");
+    } else {
+      addLog(`[${lbl}] 🚪✨ Escapou do labirinto sem errar nenhuma porta! Memória impecável. +40% movimentação.`, "info");
+    }
+    if(musicOn) sfx("day", volume);
+    maybeCritical("corredor");
+  };
+
   // game over / vitória
   useEffect(()=>{
     if(phase!=="game") return;
@@ -3572,7 +3814,7 @@ export default function SBTGame() {
     setLog([]);setHotspot(null);setNpcMsg(null);setEndReason(null);
     setCalangoPassed(false);setWarned({});setName("");setShiftCfg(null);
     setLocks({});setCritModal(null);setInfoModal(null);setOpenZone(null);setUsageCounts({});
-    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);setThuttiGame(null);setMusicTrack(MUSIC_MAIN);setUsedOnce({});setExtChar(null);setLastExtChar(null);setVeraVisible(false);setRodaOpen(false);setDescargasFeitas(false);setLoiraChamada(false);setComidaHoje(null);setQuadraReservada(false);setFutebolUsado(false);setFutebolOpen(false);setBondeVisible(false);
+    setWaterClicks(0);setDays(0);setTotalTurnsWon(0);setShowRanking(false);setUsedCriticals({});setFamosoAtual(null);setFamosoUsado(false);setZonaMsg(null);setCvtUnlocked(false);setCvtAvailable(false);setCocoVisible(false);setSaraVisible(false);setThuttiGame(null);setMusicTrack(MUSIC_MAIN);setUsedOnce({});setExtChar(null);setLastExtChar(null);setVeraVisible(false);setRodaOpen(false);setDescargasFeitas(false);setLoiraChamada(false);setComidaHoje(null);setQuadraReservada(false);setFutebolUsado(false);setFutebolOpen(false);setBondeVisible(false);setLabOpen(false);setLabUsadoHoje(false);
   };
 
   // Continua para o próximo dia sem resetar tudo
@@ -3607,6 +3849,7 @@ export default function SBTGame() {
     setUsedCriticals({}); setFamosoAtual(null); setFamosoUsado(false);
     setZonaMsg(null); setThuttiGame(null); setMusicTrack(MUSIC_MAIN);
     setDescargasFeitas(false);
+    setLabUsadoHoje(false); setLabOpen(false);   // labirinto pode voltar a ocorrer no novo dia
     setPhase("game");
 
     // Mensagens de VR e pagamento no log (começo do dia)
@@ -3662,7 +3905,7 @@ export default function SBTGame() {
     setLocks({}); setCritModal(null); setOpenZone(null); setUsageCounts({});
     setWaterClicks(0); setDays(0); setTotalTurnsWon(0); setUsedCriticals({});
     setFamosoAtual(null); setFamosoUsado(false); setZonaMsg(null);
-    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false); setThuttiGame(null); setMusicTrack(MUSIC_MAIN); setUsedOnce({}); setExtChar(null); setLastExtChar(null); setVeraVisible(false); setRodaOpen(false); setDescargasFeitas(false); setLoiraChamada(false); setComidaHoje(null); setQuadraReservada(false); setFutebolUsado(false); setFutebolOpen(false); setBondeVisible(false);
+    setCvtUnlocked(false); setCvtAvailable(false); setInfoModal(null); setCocoVisible(false); setSaraVisible(false); setThuttiGame(null); setMusicTrack(MUSIC_MAIN); setUsedOnce({}); setExtChar(null); setLastExtChar(null); setVeraVisible(false); setRodaOpen(false); setDescargasFeitas(false); setLoiraChamada(false); setComidaHoje(null); setQuadraReservada(false); setFutebolUsado(false); setFutebolOpen(false); setBondeVisible(false); setLabOpen(false); setLabUsadoHoje(false);
     // Configura o novo jogo
     setName(n); setShiftCfg(s); setTurnLabels(genLabels(s.startH,s.startM));
     setPhase("game");
@@ -3957,6 +4200,11 @@ export default function SBTGame() {
       {/* MINIGAME FUTEBOL DA CRIAÇÃO VISUAL */}
       {futebolOpen&&(
         <FutebolCriacaoVisual playerName={name||"Você"} onReward={futebolReward} onClose={futebolClose}/>
+      )}
+
+      {/* MINIGAME LABIRINTO DO SBT (Corredor) */}
+      {labOpen&&(
+        <LabirintoSBT onEscape={labEscape}/>
       )}
 
       {/* MINIGAME DO THUTTI — pop-up 80% */}
