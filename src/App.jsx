@@ -212,6 +212,7 @@ const CRITICAL_EVENTS = {
   ],
   banheiro:[
     { id:"piriri",        emoji:"🚽", title:"PIRIRI!",                   msg:"Aquele mal-estar inoportuno te golpeou no pior momento possível.",                                    type:"set_stat", stat:"agua",        value:10 },
+    { id:"banheiro_fedido",emoji:"🤢",title:"Banheiro Fedido!",          msg:"O banheiro está podre, pode ser um cano que estourou ou alguém que apodreceu por dentro.",           type:"set_stat", stat:"criar", value:8, garantidoCada:5, oncePer:"day" },
   ],
   praca:[
     { id:"mineiros",      emoji:"🧀", title:"Os Mineiros na Praça!",     msg:"OS MINEIROS estão vendendo queijo na praça! Barulho ensurdecedor, impossível pensar.",               type:"lock", category:"criar",     turns:4 },
@@ -2966,20 +2967,32 @@ export default function SBTGame() {
   useEffect(()=>{
     if(phase!=="game") return;
     const currentDay = days + 1;
-    if(currentDay >= 2 && Math.random() < 0.50){
+
+    // ── ESCASSEZ PROGRESSIVA ──────────────────────────────────────────────────
+    // Eventos "salvadores" (SARA, Coco, Famoso, Vera, Bonde, personagens externos)
+    // ficam mais raros conforme os dias passam. A partir do dia 6, a chance cai
+    // 6% ao dia (multiplicativo), com piso de 50% da chance original — assim nunca
+    // somem de vez, mas deixam de ser socorro garantido nos dias avançados.
+    const escassez = (chanceBase) => {
+      if(currentDay <= 5) return chanceBase;
+      const fator = Math.max(0.50, 1 - (currentDay - 5) * 0.06);
+      return chanceBase * fator;
+    };
+
+    if(currentDay >= 2 && Math.random() < escassez(0.50)){
       setFamosoAtual(sortearFamoso());
     } else {
       setFamosoAtual(null);
     }
     setFamosoUsado(false);
-    // Coco Mágico no Jornalismo: 25% de chance por dia
-    setCocoVisible(Math.random() < 0.25);
-    // SARA no CVT: 50% de chance por dia (só relevante quando o CVT está disponível)
-    setSaraVisible(Math.random() < 0.50);
-    // Vera Verão no Estúdio: 25% de chance por dia, a partir do dia 5
-    setVeraVisible(currentDay >= 5 && Math.random() < 0.25);
-    // Personagem da Área Externa: 50% de chance/dia, sorteia entre os 3, nunca repete o do dia anterior
-    if(Math.random() < 0.50){
+    // Coco Mágico no Jornalismo: 25% base, escasseia com os dias
+    setCocoVisible(Math.random() < escassez(0.25));
+    // SARA no CVT: 50% base, escasseia com os dias
+    setSaraVisible(Math.random() < escassez(0.50));
+    // Vera Verão no Estúdio: 25% base a partir do dia 5, escasseia com os dias
+    setVeraVisible(currentDay >= 5 && Math.random() < escassez(0.25));
+    // Personagem da Área Externa: 50% base, escasseia; sorteia entre os 3, nunca repete o do dia anterior
+    if(Math.random() < escassez(0.50)){
       const pool = EXT_CHARS.filter(c => c.id !== lastExtChar);
       const escolhido = pool[Math.floor(Math.random()*pool.length)];
       setExtChar(escolhido);
@@ -2989,10 +3002,10 @@ export default function SBTGame() {
     }
     // Overlay de transição "DIA X"
     setDayIntro(currentDay);
-    // Comida do dia na ID Visual: sempre há uma, sorteada aleatoriamente (pode repetir)
+    // Comida do dia na ID Visual: sempre há uma (não escasseia — pode ser boa ou ruim)
     setComidaHoje(COMIDAS[Math.floor(Math.random()*COMIDAS.length)]);
-    // Bonde da Água no Corredor: 40% de chance/dia a partir do dia 2 (some ao usar, mas pode voltar em outro dia)
-    setBondeVisible(currentDay >= 2 && Math.random() < 0.40);
+    // Bonde da Água no Corredor: 40% base a partir do dia 2, escasseia com os dias
+    setBondeVisible(currentDay >= 2 && Math.random() < escassez(0.40));
     if(musicOn) sfx("day", volume);
     const tId = setTimeout(()=>setDayIntro(null), 2000);
     return ()=>clearTimeout(tId);
@@ -3176,15 +3189,22 @@ export default function SBTGame() {
   const maybeCritical = (sceneId) => {
     const evts = CRITICAL_EVENTS[sceneId];
     if(!evts) return;
-    // eventos raros têm 5% de chance, normais 20%
+    const currentDay = days + 1;
+    // eventos raros têm 5% de chance, normais 20%; `chance` sobrescreve
+    // `garantidoCada:N` → dispara com certeza nos dias múltiplos de N (na 1ª ação do ambiente)
     // eventos com oncePer="day" só disparam se ainda não ocorreram hoje
     const pool = evts.filter(ev => {
       if(ev.oncePer==="day" && usedCriticals[ev.id]) return false;
+      if(ev.garantidoCada) return currentDay % ev.garantidoCada === 0; // garantido nesses dias, nunca fora deles
       const chance = ev.chance != null ? ev.chance : (ev.raro ? 0.05 : 0.20);
       return Math.random() < chance;
     });
     if(pool.length===0) return;
-    const ev = pool[Math.floor(Math.random()*pool.length)];
+    // eventos "garantidos" (garantidoCada) têm prioridade sobre os aleatórios do mesmo ambiente
+    const garantidos = pool.filter(e => e.garantidoCada);
+    const ev = garantidos.length > 0
+      ? garantidos[Math.floor(Math.random()*garantidos.length)]
+      : pool[Math.floor(Math.random()*pool.length)];
     if(ev.oncePer==="day") setUsedCriticals(prev=>({...prev,[ev.id]:true}));
     const lockT = scaledLockTurns(ev.turns);
     if(ev.type==="lock")       setLocks(prev=>({...prev,[ev.category]:Math.max(prev[ev.category]||0,lockT)}));
@@ -3423,6 +3443,7 @@ export default function SBTGame() {
     addLog(`[${lbl}] ${a.emoji} ${a.msg} (${tl})`);
 
     if(a.time>0){ advanceTurns(a.time); maybeCritical(scene); }
+    else if(scene==="banheiro"){ maybeCritical(scene); }   // banheiro: até ações instantâneas podem revelar o fedor
     setOpenZone(null); setHotspot(null);
   };
 
