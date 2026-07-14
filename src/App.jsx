@@ -576,8 +576,8 @@ const SCENES = {
         img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1783122991/ban_fantasma_nsko9q.png",
         actionIds:["pedir_loira"],
         falas:[
-          { text:"Você me chamou três vezes... aqui estou. Vou te livrar do que te prende.", minDay:1 },
-          { text:"Espelho, espelho meu... seus bloqueios acabaram.", minDay:1 },
+          { text:"Você me chamou três vezes... aqui estou. Posso libertar TODAS as suas categorias bloqueadas 🔒.", minDay:1 },
+          { text:"Espelho, espelho meu... peça minha ajuda e nenhum bloqueio restará.", minDay:1 },
         ],
       },
     ],
@@ -587,7 +587,7 @@ const SCENES = {
       {id:"cochilo",           label:"Arriscar cochilo 😴",emoji:"💤", time:0, special:"cochilo", effects:{},                    msg:"Você fechou os olhos 'só um segundo'..."},
       {id:"descargas_palavroes",label:"Dar 3 descargas e falar 3 palavrões", emoji:"🚽", time:1, availDay:3, special:"descargas", effects:{criar:0,mexer:0,socializar:0}, msg:"FLUSH! FLUSH! FLUSH! E três palavras impublicáveis. O banheiro estremeceu..."},
       {id:"chamar_loira",      label:"Chamar a Loira do Banheiro", emoji:"🪞", time:0, special:"chamar_loira", effects:{}, msg:"Você encarou o espelho e chamou três vezes... Uma presença surgiu atrás de você."},
-      {id:"pedir_loira",       label:"Pedir ajuda à Loira", emoji:"👻", time:0, special:"loira", effects:{}, msg:"A Loira do Banheiro passou a mão sobre você. Todos os bloqueios evaporaram."},
+      {id:"pedir_loira",       label:"Pedir ajuda à Loira 🔓", emoji:"👻", time:0, special:"loira", effects:{}, msg:"A Loira do Banheiro passou a mão sobre você. 🔓 TODAS as categorias bloqueadas foram liberadas!"},
     ]
   },
   calango:{
@@ -667,9 +667,11 @@ const SCENES = {
   },
   jornalismo:{
     id:"jornalismo", name:"Jornalismo", emoji:"📡",
-    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780424251/jornalismo_base_bslb9u.jpg",
+    bgImage:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1784042956/jornalismo_base_2_adjtrt.jpg",
+    canDrink:true,
     npcs:[], hotspots:[],
     clickZones:[
+      { id:"zonaAgua", label:"Garrafa d'água", emoji:"💧", x:91, y:3.4, w:6.2, h:26.3, type:"drink" },
       { id:"zona1", label:"Redação", emoji:"🔥", x:2, y:38, w:17, h:17, type:"fala",
         falas:[
           { text:"Hmm, parece que a redação está pegando fogo", minDay:1 },
@@ -722,8 +724,8 @@ const SCENES = {
         img:"https://res.cloudinary.com/dio7kf0tb/image/upload/v1780443067/sara_xgjsks.png",
         actionIds:["pedir_sara"],
         falas:[
-          { text:"Oi eu sou S.A.R.A. (Sistema Auxiliar Racional Autônomo), precisa da minha ajuda?", minDay:1 },
-          { text:"A minha voz é um pouco velha, mas estou novinha em folha...", minDay:1 },
+          { text:"Oi eu sou S.A.R.A. (Sistema Auxiliar Racional Autônomo). Posso destravar suas categorias bloqueadas!", minDay:1 },
+          { text:"A minha voz é um pouco velha, mas estou novinha em folha... e resolvo qualquer bloqueio 🔒 no sistema.", minDay:1 },
         ],
       },
       { id:"zona1", label:"Mesa de animação", emoji:"🎬", x:8.5, y:49.8, w:19.2, h:25.6, type:"action+fala", actionIds:["cvt_clipe"],
@@ -770,7 +772,7 @@ const SCENES = {
       {id:"cvt_sofa",       label:"Sentar no sofá",               emoji:"🛋️", time:4,  effects:{criar:-30,mexer:-30,socializar:+30}, msg:"O sofá te abraçou. Difícil levantar. Mas que paz."},
       {id:"cvt_imaginacao", label:"Desenhar na imaginação",       emoji:"✏️", time:2,  effects:{criar:+20,mexer:-10,socializar:0},  msg:"30 minutos imaginando. Nada no papel, tudo na cabeça. Conta como trabalho."},
       {id:"cvt_passeio",    label:"Passeio Nostálgico",           emoji:"🎭", time:8,  effects:{criar:-10,mexer:+50,socializar:+10}, msg:"2 horas passeando pelos cenários antigos. As pernas e o coração agradecem."},
-      {id:"pedir_sara",     label:"Pedir ajuda pra SARA",         emoji:"🤖", time:0,  special:"sara", effects:{}, msg:"S.A.R.A. processou tudo num piscar. Todos os bloqueios foram dissolvidos."},
+      {id:"pedir_sara",     label:"Pedir ajuda pra SARA 🔓",     emoji:"🤖", time:0,  special:"sara", effects:{}, msg:"S.A.R.A. processou tudo num piscar. 🔓 TODAS as categorias bloqueadas foram liberadas!"},
     ]
   },
   videografismo:{
@@ -994,7 +996,7 @@ const HydSection = ({ garrafa, agua, canDrinkHere, float }) => {
       <div style={{fontSize:9,color:canDrinkHere?"#0ea5e9":"#664422",marginTop:2}}>
         {canDrinkHere
           ? gEmpty?"🚫 Encha a garrafa no corredor primeiro!":"💧 Clique na garrafa para beber (−25% garrafa)"
-          :"🚫 Água só na ID Visual, Editoria ou Switcher"}
+          :"🚫 Água só na ID Visual, Editoria, Switcher ou Jornalismo"}
       </div>
       <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
     </div>
@@ -1042,6 +1044,10 @@ const ActionBtn = ({ a, locked, unavail, dayLocked, exhausted, usageCount, limit
     for(const [k,v] of Object.entries(a.effects)){
       if(v>=100 && barNames[k]){ boostTxt = `+100% de ${barNames[k]}`; break; }
     }
+  }
+  // Ações que liberam categorias bloqueadas (SARA e Loira do Banheiro)
+  if(a.special==="sara" || a.special==="loira"){
+    boostTxt = "🔓 Libera TODAS as categorias bloqueadas";
   }
 
   return (
@@ -1222,7 +1228,7 @@ const Intro = ({ onStart, onRanking }) => {
           <div style={{color:"#e8c840",marginBottom:5,fontSize:9,letterSpacing:2,textTransform:"uppercase"}}>Como jogar</div>
           <div style={{marginBottom:2}}>🏠 Navegue pelos ambientes do SBT</div>
           <div style={{marginBottom:2}}>🖱️ Clique em objetos do cenário para ver as ações disponíveis</div>
-          <div style={{marginBottom:2}}>💧 Hidratação: beba água na ID Visual ou Editoria!</div>
+          <div style={{marginBottom:2}}>💧 Hidratação: beba água nas garrafas espalhadas pelos ambientes!</div>
           <div>🔒 Eventos críticos bloqueiam ações</div>
         </div>
 
