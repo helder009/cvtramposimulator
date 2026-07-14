@@ -3207,8 +3207,8 @@ export default function SBTGame() {
     setSaraVisible(Math.random() < escassez(0.50));
     // Vera Verão no Estúdio: 25% base a partir do dia 5, escasseia com os dias
     setVeraVisible(currentDay >= 5 && Math.random() < escassez(0.25));
-    // Personagem da Área Externa: 50% base, escasseia; sorteia entre os 3, nunca repete o do dia anterior
-    if(Math.random() < escassez(0.50)){
+    // Personagem da Área Externa: 70% base, escasseia; sorteia entre os 3, nunca repete o do dia anterior
+    if(Math.random() < escassez(0.70)){
       const pool = EXT_CHARS.filter(c => c.id !== lastExtChar);
       const escolhido = pool[Math.floor(Math.random()*pool.length)];
       setExtChar(escolhido);
